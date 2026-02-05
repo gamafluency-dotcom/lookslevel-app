@@ -1,6 +1,5 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Configuração para permitir arquivos maiores (fotos)
 export const config = {
   api: {
     bodyParser: {
@@ -8,10 +7,6 @@ export const config = {
     },
   },
 };
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -25,37 +20,38 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Nenhuma foto recebida' });
     }
 
-    // O Prompt para a IA (Visagista Profissional)
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `Você é um especialista em Visagismo e Looksmaxing. Analise as fotos e retorne APENAS um JSON (sem markdown) com:
-          - score: Nota de 0 a 10 (decimal, ex: 7.4). Seja criterioso.
-          - potential: Nota potencial (maior que a atual, ex: 9.1).
-          - comment: Um parágrafo técnico e construtivo sobre simetria, pele, mandíbula e olhos. Mencione pontos fortes e fracos.`
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const imageParts = photos.map(photoStr => {
+      const base64Data = photoStr.split(',')[1];
+      return {
+        inlineData: {
+          data: base64Data,
+          mimeType: "image/jpeg",
         },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: "Analise estas fotos para o relatório LooksLevel Pro." },
-            ...photos.map(base64 => ({
-              type: "image_url",
-              image_url: { url: base64 }
-            }))
-          ]
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 500
+      };
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
-    res.status(200).json(result);
+    const prompt = `Você é um especialista em Visagismo e Looksmaxing. 
+    Analise estas fotos e retorne APENAS um código JSON (sem markdown, sem crases) com este formato exato:
+    {
+      "score": (número decimal de 4.0 a 9.8, ex: 7.4),
+      "potential": (número decimal maior que score, ex: 9.1),
+      "comment": "Um parágrafo técnico, curto e construtivo sobre simetria, pele e estrutura óssea."
+    }`;
+
+    const result = await model.generateContent([prompt, ...imageParts]);
+    const response = await result.response;
+    let text = response.text();
+
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    const analysis = JSON.parse(text);
+    res.status(200).json(analysis);
 
   } catch (error) {
-    console.error("Erro OpenAI:", error);
-    res.status(500).json({ error: "Erro ao processar análise." });
+    console.error("Erro Gemini:", error);
+    res.status(500).json({ error: "Erro ao processar análise com Gemini." });
   }
 }
