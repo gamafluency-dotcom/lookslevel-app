@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LooksLevel | Avaliação de Atratividade 1-10</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0F0F0F',
+                            card: '#1F1F1F',
+                            border: '#333333'
+                        },
+                        brand: {
+                            red: '#FF0033',
+                            deep: '#8A0303',
+                            text: '#E0E0E0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .blur-content { filter: blur(8px); user-select: none; pointer-events: none; opacity: 0.3; }
+        body.modal-open { overflow: hidden; }
+        .focus-ring:focus { outline: none; border-color: #FF0033; box-shadow: 0 0 0 1px #FF0033; }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(2); opacity: 0; } }
+        .animate-ping-slow { animation: pulse-ring 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+    </style>
+</head>
+<body class="bg-dark-bg text-brand-text antialiased min-h-screen flex flex-col">
+
+    <header class="sticky top-0 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center">
+            <a href="#" onclick="location.reload()" class="text-2xl font-bold text-white">
+                Looks<span class="bg-gradient-to-r from-brand-red to-brand-deep bg-clip-text text-transparent">Level</span>
+            </a>
+        </div>
+    </header>
+
+    <main id="view-landing" class="flex-grow transition-opacity duration-500">
+        <section class="pt-10 pb-16 px-4 text-center">
+            <div class="max-w-xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-extrabold mb-4 text-white leading-tight">
+                    Quão Atraente Você É,<br>
+                    <span class="bg-gradient-to-r from-brand-red to-brand-deep bg-clip-text text-transparent">De 1 a 10?</span>
+                </h1>
+                
+                <p class="text-sm font-semibold text-gray-400 mb-8 flex items-center justify-center gap-2">
+                    <i class="fas fa-shield-alt text-brand-red"></i> Privado pelo design, não apenas por política
+                </p>
+
+                <div class="flex justify-center gap-4 mb-10 scale-90 sm:scale-100">
+                    <div class="relative w-32 bg-dark-card border border-dark-border rounded-xl shadow-lg p-2 flex flex-col items-center">
+                        <span class="absolute -top-3 -left-2 bg-brand-red text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-dark-bg">1</span>
+                        <p class="text-xs font-bold text-white mb-2">Envie Selfies</p>
+                        <div class="flex gap-1 opacity-70">
+                            <div class="w-10 h-14 bg-gray-800 rounded overflow-hidden border border-gray-700"><img src="https://placehold.co/40x56/000000/FFF?text=Frente" class="object-cover w-full h-full opacity-50"></div>
+                            <div class="w-10 h-14 bg-gray-800 rounded overflow-hidden border border-gray-700"><img src="https://placehold.co/40x56/000000/FFF?text=Lado" class="object-cover w-full h-full opacity-50"></div>
+                        </div>
+                    </div>
+                    <div class="relative w-32 bg-dark-card border border-dark-border rounded-xl shadow-lg p-2 flex flex-col items-center">
+                        <span class="absolute -top-3 -left-2 bg-white text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-dark-bg">2</span>
+                        <p class="text-xs font-bold text-white mb-2">Análise IA</p>
+                        <i class="fas fa-brain text-3xl text-brand-red mt-2 animate-pulse"></i>
+                        <span class="text-[10px] text-gray-500 mt-1">≈ 20 s</span>
+                    </div>
+                     <div class="relative w-28 bg-dark-card border border-dark-border rounded-xl shadow-lg p-2 flex flex-col items-center">
+                        <span class="absolute -top-3 -left-2 bg-brand-deep text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-dark-bg">3</span>
+                        <p class="text-xs font-bold text-white mb-2">Resultados</p>
+                        <div class="w-full h-12 bg-dark-bg rounded border border-dark-border flex items-center justify-center">
+                            <span class="text-xl font-bold text-brand-red">8.5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-dark-card p-6 rounded-2xl shadow-2xl border border-dark-border hover:border-brand-red/50 transition-colors max-w-md mx-auto relative z-10 group">
+                    <h2 class="text-2xl font-bold text-white mb-2">
+                        Obtenha sua Nota <span class="text-brand-red">Grátis</span>
+                    </h2>
+                    <p class="text-gray-400 text-sm mb-6">Envie 3 fotos do seu rosto (frente & lados).</p>
+                    
+                    <input type="file" id="photoInput" multiple accept="image/*" class="hidden" onchange="handleFiles(this.files)">
+                    
+                    <button onclick="document.getElementById('photoInput').click()" class="w-full bg-gradient-to-r from-brand-red to-brand-deep hover:brightness-110 text-white font-bold py-3 px-6 rounded-xl shadow-lg active:scale-95 transition transform mb-3">
+                        <i class="fas fa-camera mr-2"></i> Selecionar da Galeria...
+                    </button>
+                    
+                    <p class="text-xs text-gray-500">Suas fotos NUNCA são vistas por humanos e deletadas em 72h.</p>
+                    
+                    <div id="previewArea" class="hidden mt-4 grid grid-cols-3 gap-2"></div>
+                </div>
+
+                <div id="continueContainer" class="hidden mt-4 max-w-md mx-auto text-left relative z-10">
+                    <div class="flex items-start gap-3 mb-4 px-2 py-3 bg-dark-card rounded-lg border border-dark-border">
+                        <input type="checkbox" id="termsCheckbox" class="mt-1 w-5 h-5 bg-dark-bg border-gray-600 text-brand-red rounded focus:ring-brand-red cursor-pointer accent-brand-red">
+                        <label for="termsCheckbox" class="text-xs text-gray-400 cursor-pointer select-none">
+                            Concordo com os <a href="#" class="text-brand-red underline hover:text-white">Termos de Serviço</a> e a <a href="#" class="text-brand-red underline hover:text-white">Política de Privacidade</a>.
+                        </label>
+                    </div>
+
+                    <button onclick="openEmailModal()" class="w-full bg-white text-black font-bold py-4 rounded-xl shadow-xl hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                        Próximo: Confirmar e Iniciar Análise <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="mt-8 flex flex-col items-center gap-3 text-xs sm:text-sm text-gray-500 font-medium relative z-0">
+                    <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+                        <div class="flex items-center gap-1.5 px-4 py-2 bg-dark-card rounded-full border border-dark-border shadow-sm">
+                            <i class="fas fa-lock text-brand-red"></i> Nós nunca vendemos dados
+                        </div>
+                        <div class="flex items-center gap-1.5 px-4 py-2 bg-dark-card rounded-full border border-dark-border shadow-sm">
+                            <i class="fas fa-bolt text-white"></i> Sem cadastro necessário
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 px-4 py-2 bg-dark-card rounded-full border border-dark-border shadow-sm">
+                        <i class="fas fa-trash text-gray-400"></i> Fotos excluídas após 72h
+                    </div>
+                </div>
+
+            </div>
+            
+             <div class="mt-16 max-w-lg mx-auto bg-dark-card rounded-3xl shadow-xl border border-dark-border overflow-hidden relative group cursor-pointer">
+                <div class="p-8 text-center">
+                    <h3 class="text-xl font-bold text-white">Estatísticas LooksLevel</h3>
+                    <p class="text-sm text-gray-500">Baseado em 10,000+ avaliações</p>
+                    <div class="my-6">
+                        <span class="text-7xl font-black bg-gradient-to-br from-brand-red to-brand-deep bg-clip-text text-transparent">5.2</span>
+                        <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-dark-bg text-brand-red border border-brand-red/30 rounded-full text-xs font-bold uppercase tracking-wider">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-red"></span>
+                            </span>
+                            Nota Mais Comum
+                        </div>
+                    </div>
+                    <div class="h-24 bg-dark-bg rounded-lg flex items-end justify-center gap-1 p-2 border border-dark-border">
+                        <div class="w-2 bg-gray-800 h-[10%]"></div>
+                        <div class="w-2 bg-gray-800 h-[30%]"></div>
+                        <div class="w-2 bg-gray-700 h-[60%]"></div>
+                        <div class="w-2 bg-brand-red h-[90%] shadow-[0_0_10px_rgba(255,0,51,0.5)]"></div>
+                        <div class="w-2 bg-gray-700 h-[50%]"></div>
+                        <div class="w-2 bg-gray-800 h-[20%]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 sm:mt-12 max-w-lg mx-auto relative group cursor-pointer">
+                <div class="absolute -inset-0.5 bg-gradient-to-br from-brand-red/20 to-brand-deep/20 rounded-[2rem] blur opacity-40 group-hover:opacity-75 transition duration-500"></div>
+
+                <div class="relative bg-dark-card rounded-[1.8rem] shadow-xl overflow-hidden border border-dark-border">
+                    <div class="pt-6 px-8 text-center">
+                        <h3 class="text-lg font-bold text-white mb-1">O Impacto de ser Atraente</h3>
+                        <p class="text-xs text-gray-500 font-medium">Pesquisa sobre como sua pontuação afeta resultados no mundo real</p>
+                    </div>
+
+                    <div class="py-6 px-6 grid grid-cols-2 gap-4">
+                        <div class="bg-dark-bg p-4 rounded-xl border border-dark-border text-center">
+                            <span class="block text-3xl font-black text-brand-red">+15%</span>
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Salários Maiores</span>
+                        </div>
+                        <div class="bg-dark-bg p-4 rounded-xl border border-dark-border text-center">
+                            <span class="block text-3xl font-black text-white">3,6x</span>
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Melhor Assistência Médica</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-dark-bg border-t border-dark-border p-4 flex items-center justify-between hover:bg-black/50 transition-colors duration-300">
+                        <span class="text-sm font-bold text-gray-300 ml-2">Ver o estudo completo</span>
+                        <div class="w-8 h-8 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-brand-red group-hover:border-brand-red transition-all duration-300">
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-20 sm:mt-24 max-w-3xl mx-auto px-2">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-6 text-white">
+                    Receba uma avaliação <span class="bg-gradient-to-r from-brand-red to-brand-deep bg-clip-text text-transparent">GRATUITA</span>
+                </h2>
+                <p class="text-gray-400 mb-8 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+                    Obtenha sua nota inicial e traços básicos gratuitamente. Quer saber mais?<br class="hidden sm:block">
+                    Desbloqueie o relatório COMPLETO e caso queira melhorar mais rápido, adicione uma avaliação humana especializada posteriormente.
+                </p>
+
+                <div class="bg-dark-card border border-dark-border rounded-2xl p-6 sm:p-8 text-left shadow-sm max-w-xl mx-auto">
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-900/30 flex items-center justify-center border border-green-800">
+                                <i class="fas fa-check text-green-500 text-xs"></i>
+                            </div>
+                            <span class="text-gray-200 font-medium">Pontuação inicial de IA e insights básicos gratuitos</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-gray-500">
+                            <div class="mt-1 flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-lock text-brand-red text-sm"></i>
+                            </div>
+                            <span>Opcional: Relatório completo de IA (Detalhes após a pontuação gratuita)</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-gray-500">
+                            <div class="mt-1 flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-lock text-white text-sm"></i>
+                            </div>
+                            <span>Experiência Premium: IA + Avaliação humana especializada</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <div id="emailModal" class="fixed inset-0 z-[55] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-center relative animate-fade-in">
+            
+            <div class="flex justify-between items-center mb-8 px-4 text-sm font-semibold text-gray-500 relative">
+                <div class="absolute left-0 top-1/2 w-full h-0.5 bg-dark-border -z-10"></div>
+                <div class="flex flex-col items-center bg-dark-card px-2 z-10">
+                    <div class="w-6 h-6 rounded-full bg-brand-red text-white flex items-center justify-center text-xs mb-1"><i class="fas fa-check"></i></div>
+                    <span class="text-brand-red">Fotos</span>
+                </div>
+                <div class="flex flex-col items-center bg-dark-card px-2 z-10">
+                    <div class="w-6 h-6 rounded-full bg-brand-red text-white flex items-center justify-center text-xs mb-1">2</div>
+                    <span class="text-brand-red">Enviar</span>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-2 leading-snug">
+                Último passo! Para onde devemos enviar o link da sua avaliação e as dicas?
+            </h3>
+
+            <div class="mt-6 text-left">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Seu endereço de e-mail</label>
+                <input type="email" id="userEmail" placeholder="voce@exemplo.com" class="w-full px-4 py-3 rounded-xl border border-dark-border bg-dark-bg text-white focus:border-brand-red focus-ring transition-all placeholder-gray-600">
+            </div>
+
+            <div class="mt-4 flex items-start gap-3 text-left p-2">
+                <input type="checkbox" id="marketingCheckbox" class="mt-1 w-5 h-5 bg-dark-bg border-gray-600 text-brand-red rounded focus:ring-brand-red cursor-pointer accent-brand-red flex-shrink-0">
+                <label for="marketingCheckbox" class="text-xs text-gray-400 cursor-pointer leading-relaxed">
+                    Concordo em receber relatórios, atualizações e dicas do LooksLevel por e-mail. Você pode cancelar a inscrição a qualquer momento.
+                </label>
+            </div>
+
+            <div class="my-4 bg-dark-bg border border-dark-border rounded p-2 flex items-center justify-center gap-2 max-w-[200px] mx-auto">
+                <div class="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs"><i class="fas fa-check"></i></div>
+                <span class="text-sm font-semibold text-gray-300">Sucesso!</span>
+                <span class="text-[10px] text-gray-500 ml-1">Cloudflare</span>
+            </div>
+
+            <button onclick="submitEmailAndStart()" class="w-full bg-gradient-to-r from-brand-red to-brand-deep hover:brightness-110 text-white font-bold py-3.5 rounded-xl shadow-[0_0_15px_rgba(255,0,51,0.4)] transform active:scale-95 transition-all">
+                Começar Análise <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+            
+            <button onclick="document.getElementById('emailModal').classList.add('hidden')" class="mt-3 text-gray-500 text-sm font-semibold hover:text-white transition">
+                Voltar
+            </button>
+        </div>
+    </div>
+
+    <div id="processingModal" class="fixed inset-0 z-[60] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-2xl shadow-2xl max-w-md w-full p-8 text-center relative overflow-hidden">
+            <div class="mb-6 relative">
+                <div class="w-20 h-20 bg-gradient-to-r from-brand-red to-brand-deep rounded-full mx-auto flex items-center justify-center shadow-[0_0_20px_rgba(255,0,51,0.5)] relative z-10">
+                    <i class="fas fa-brain text-white text-3xl animate-pulse"></i>
+                </div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-brand-red/20 rounded-full animate-ping-slow"></div>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">Criando seu Relatório...</h3>
+            <p class="text-gray-400 text-sm mb-6">Isso leva cerca de 20 segundos. Por favor não feche.</p>
+            
+            <div class="w-full bg-dark-bg rounded-full h-4 mb-2 overflow-hidden border border-dark-border">
+                <div id="progressBar" class="bg-gradient-to-r from-brand-red to-brand-deep h-full w-0 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(255,0,51,0.7)]"></div>
+            </div>
+            <div class="flex justify-between text-xs font-bold text-gray-500 mb-6">
+                <span id="progressText">0%</span>
+                <span id="statusText">Iniciando...</span>
+            </div>
+            
+            <div class="bg-dark-bg border border-dark-border rounded-lg p-4 flex items-start gap-3 text-left">
+                <i class="fas fa-lightbulb text-yellow-500 mt-1"></i>
+                <p class="text-xs text-gray-300 leading-relaxed">
+                    <strong>Você sabia?</strong> <span id="didYouKnowText">Nossa IA PRO de análises leva de 40-60 segundos para fazer seu relatório completo.</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <main id="view-results" class="hidden min-h-screen bg-dark-bg pb-20">
+        <div class="pt-8 pb-12 text-center px-4 shadow-sm relative overflow-hidden">
+            <div class="max-w-md mx-auto relative z-10">
+                <p class="text-gray-400 font-medium mb-4">Sua Prévia LooksLevel™ Gratuita</p>
+                
+                <div class="bg-dark-card rounded-2xl p-6 shadow-2xl border border-dark-border inline-block w-full">
+                    <div class="w-24 h-24 bg-dark-bg rounded-xl mx-auto mb-4 overflow-hidden border-2 border-dark-border shadow-md">
+                        <img id="resultUserImage" src="" class="w-full h-full object-cover opacity-80">
+                    </div>
+                    
+                    <h2 class="text-lg font-bold text-white">Sua Nota:</h2>
+                    <div class="flex items-center justify-center gap-2 mt-1">
+                        <span id="finalScore" class="text-6xl font-black text-brand-red tracking-tighter drop-shadow-[0_0_10px_rgba(255,0,51,0.5)]">0.0</span>
+                        <span class="text-2xl text-gray-500 font-bold self-end mb-2">/10</span>
+                    </div>
+
+                    <div class="mt-3 inline-block bg-green-900/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-bold border border-green-800">
+                        Potencial: <span id="potentialScore">0.0</span> <i class="fas fa-arrow-up"></i>
+                    </div>
+
+                    <div class="mt-6 text-left bg-dark-bg p-4 rounded-xl border border-dark-border">
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-1">Avaliação IA</p>
+                        <p class="text-sm text-gray-300 leading-relaxed" id="aiComment">
+                            Você possui uma estrutura óssea sólida, destacada por uma linha do maxilar proeminente. Com o protocolo correto, você pode atingir seu potencial máximo.
+                        </p>
+                        <div class="mt-3 bg-green-900/20 text-green-400 text-xs p-2 rounded border border-green-800/50 font-semibold text-center">
+                            💡 Com orientação, você pode atingir uma nota <span class="font-bold">9.0+</span>!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand-red/5 to-transparent z-0 pointer-events-none"></div>
+        </div>
+
+        <div class="max-w-lg mx-auto px-4 -mt-6 relative z-20">
+            
+            <div class="bg-black text-white rounded-3xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.8)] border border-dark-border relative overflow-hidden text-center">
+                <div class="absolute inset-0 bg-white opacity-10 blur-content" style="background-image: url('https://placehold.co/400x600/111/FFF?text=Graph'); background-size: cover;"></div>
+                <div class="relative z-10">
+                    <i class="fas fa-lock text-4xl mb-4 text-brand-red animate-pulse"></i>
+                    <h2 class="text-2xl font-bold mb-4">Desbloqueie seu Relatório Completo</h2>
+                    <ul class="text-left space-y-3 text-sm text-gray-300 mb-8 mx-auto max-w-xs">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Descubra o que te impede de evoluir</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Saiba como atingir seu potencial</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Compare com +100k usuários</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Plano baseado em ciência</li>
+                    </ul>
+                    <p class="text-lg font-bold mb-2 text-white">Invista na sua primeira impressão</p>
+                    <p class="text-xs text-gray-500 mb-6">Indivíduos atraentes são vistos como mais inteligentes e confiáveis.</p>
+                </div>
+            </div>
+
+            <div class="mt-8 space-y-6">
+                <div class="bg-dark-card rounded-2xl shadow-lg border-2 border-brand-red/50 overflow-hidden relative">
+                    <div class="absolute top-0 right-0 bg-brand-red text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-md">POPULAR</div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-white">Relatório Completo</h3>
+                            <span class="text-2xl font-black text-brand-red">R$ 9,89</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-4">Evolua pelo preço de um café ☕</p>
+                        
+                        <ul class="text-sm space-y-2 mb-6 text-gray-300">
+                            <li>✅ Análise Pro detalhada e notas precisas</li>
+                            <li>✅ Seus melhores e piores traços</li>
+                            <li>✅ Plano baseado em ciência personalizado</li>
+                            <li>✅ Comparação com gênero oposto</li>
+                        </ul>
+
+                        <button onclick="goToCheckout('ia')" class="w-full bg-gradient-to-r from-brand-red to-brand-deep hover:brightness-110 text-white font-bold py-3 rounded-xl shadow-[0_0_10px_rgba(255,0,51,0.4)] transition transform active:scale-95">
+                            Desbloquear Relatório Completo <i class="fab fa-apple ml-1"></i> Pay
+                        </button>
+                        <p class="text-[10px] text-center text-red-500 font-bold mt-2">⚠️ Aumento de preço em breve</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center text-xs text-gray-600 font-bold">OU</div>
+
+                <div class="bg-dark-card rounded-2xl shadow-lg border border-white/10 overflow-hidden">
+                    <div class="bg-white text-black text-center py-1 text-xs font-bold uppercase">Melhorar mais rápido</div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-white">Relatório Expert Humano</h3>
+                            <span class="text-2xl font-black text-white">R$ 127,89</span>
+                        </div>
+                        
+                        <ul class="text-sm space-y-2 mb-6 text-gray-300">
+                            <li class="flex gap-2"><i class="fas fa-plus text-brand-red mt-1"></i> Inclui relatório completo acima</li>
+                            <li class="flex gap-2"><i class="fas fa-plus text-brand-red mt-1"></i> Passos exatos para atingir potencial</li>
+                            <li class="flex gap-2"><i class="fas fa-plus text-brand-red mt-1"></i> Primeira impressão sobre você</li>
+                            <li class="flex gap-2"><i class="fas fa-plus text-brand-red mt-1"></i> Análise de 48h por um profissional</li>
+                        </ul>
+
+                        <button onclick="goToCheckout('expert')" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-xl shadow-md transition transform active:scale-95">
+                            Obter Análise Expert <i class="fas fa-user-check ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 space-y-4">
+                <div class="bg-dark-card p-4 rounded-xl shadow-sm border border-dark-border">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-sm text-white">emily_98</span>
+                        <span class="text-xs text-gray-500">3d atrás</span>
+                    </div>
+                    <div class="text-yellow-500 text-xs mb-2">⭐⭐⭐⭐⭐</div>
+                    <p class="text-sm text-gray-300">Serviço muito bom, objetivo e oferece soluções reais para melhorar.</p>
+                </div>
+                
+                <div class="bg-dark-card p-4 rounded-xl shadow-sm border border-dark-border">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-sm text-white">stefan.m</span>
+                        <span class="text-xs text-gray-500">2d atrás</span>
+                    </div>
+                    <div class="text-yellow-500 text-xs mb-2">⭐⭐⭐⭐⭐</div>
+                    <p class="text-sm text-gray-300">Achei bom, tirei 7.1 e segui as dicas, genuinamente estou melhor.</p>
+                </div>
+            </div>
+            <div class="h-20"></div>
+        </div>
+    </main>
+
+    <script>
+        const CHECKOUT_IA = "https://pay.cakto.com.br/gse3jmv_755670"; 
+        const CHECKOUT_EXPERT = "https://pay.cakto.com.br/rn7iiop_756079";
+
+        let uploadedPhotos = [];
+
+        function handleFiles(files) {
+            const previewArea = document.getElementById('previewArea');
+            const continueContainer = document.getElementById('continueContainer');
+            
+            if(files.length > 0) {
+                previewArea.innerHTML = '';
+                previewArea.classList.remove('hidden');
+                
+                Array.from(files).slice(0, 3).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        if(index === 0) {
+                            document.getElementById('resultUserImage').src = e.target.result;
+                        }
+                        const div = document.createElement('div');
+                        // Borda escura no preview
+                        div.className = 'aspect-[3/4] bg-dark-bg rounded-lg overflow-hidden border border-dark-border relative';
+                        div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                        previewArea.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                continueContainer.classList.remove('hidden');
+            }
+        }
+
+        function openEmailModal() {
+            const termsCheckbox = document.getElementById('termsCheckbox');
+            if(!termsCheckbox.checked) {
+                alert("Por favor, concorde com os Termos de Serviço para continuar.");
+                return;
+            }
+            document.getElementById('emailModal').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function submitEmailAndStart() {
+            const emailInput = document.getElementById('userEmail');
+            const marketingCheckbox = document.getElementById('marketingCheckbox');
+
+            if(!emailInput.value.includes('@') || !emailInput.value.includes('.')) {
+                alert("Por favor, insira um e-mail válido.");
+                return;
+            }
+
+            if(!marketingCheckbox.checked) {
+                alert("Por favor, concorde em receber o relatório por e-mail para prosseguir.");
+                return;
+            }
+
+            document.getElementById('emailModal').classList.add('hidden');
+            document.getElementById('processingModal').classList.remove('hidden');
+            startProcessingAnimation();
+        }
+
+        function startProcessingAnimation() {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const statusText = document.getElementById('statusText');
+            const didYouKnowText = document.getElementById('didYouKnowText');
+            
+            let width = 0;
+            const messages = [
+                "Escaneando simetria facial...",
+                "Analisando qualidade da pele...",
+                "Medindo proporção dos olhos...",
+                "Calculando estrutura mandibular...",
+                "Comparando com banco de dados...",
+                "Gerando relatório final..."
+            ];
+
+            didYouKnowText.innerText = "Nossa IA PRO de análises leva de 40-60 segundos para fazer seu relatório completo.";
+
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    showResults();
+                } else {
+                    width++; 
+                    progressBar.style.width = width + '%';
+                    progressText.innerText = width + '%';
+                    
+                    if(width % 15 === 0) {
+                        const msgIndex = Math.floor(width / 17);
+                        if(messages[msgIndex]) statusText.innerText = messages[msgIndex];
+                    }
+
+                    if(width === 50) {
+                        didYouKnowText.innerText = "Os profissionais que participaram da construção do nosso sistema trabalham com estética, como biomédicos, dentistas, dermatologistas e etc...";
+                    }
+                }
+            }, 120);
+        }
+
+        function showResults() {
+            document.getElementById('processingModal').classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            document.getElementById('view-landing').style.display = 'none';
+            document.querySelector('header').style.display = 'none';
+            
+            const randomScore = (Math.random() * (8.2 - 6.1) + 6.1).toFixed(1);
+            const potential = (parseFloat(randomScore) + (Math.random() * (2.5 - 1.5) + 1.5)).toFixed(1);
+            const finalPotential = potential > 9.9 ? 9.9 : potential;
+
+            document.getElementById('finalScore').innerText = randomScore;
+            document.getElementById('potentialScore').innerText = finalPotential;
+            
+            const resultsView = document.getElementById('view-results');
+            resultsView.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function goToCheckout(type) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecionando...';
+            setTimeout(() => {
+                if(type === 'ia') {
+                    window.location.href = CHECKOUT_IA;
+                } else {
+                    window.location.href = CHECKOUT_EXPERT;
+                }
+                btn.innerHTML = originalText;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
