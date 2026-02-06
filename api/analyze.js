@@ -9,67 +9,55 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Permitir CORS para que o seu site consiga falar com a API
+  // Cabeçalhos para evitar erro de conexão (CORS)
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder a pre-flight request (OPTIONS)
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método incorreto' });
 
   try {
     const { photos } = req.body;
+    if (!photos) return res.status(400).json({ error: 'Nenhuma foto chegou no servidor.' });
 
-    if (!photos || photos.length === 0) {
-      return res.status(400).json({ error: 'Nenhuma foto recebida' });
+    // VERIFICAÇÃO DA CHAVE (O Pulo do Gato)
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("A chave API não foi encontrada na Vercel. Verifique o nome 'GEMINI_API_KEY'.");
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const imageParts = photos.map(photoStr => {
-      // Pequena proteção para garantir que o formato base64 esteja limpo
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
       return {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/jpeg",
-        },
+        inlineData: { data: base64Data, mimeType: "image/jpeg" },
       };
     });
 
-    const prompt = `Você é um especialista em Visagismo e Looksmaxing. 
-    Analise as fotos e retorne APENAS um JSON válido.
-    Formato obrigatório:
-    {
-      "score": 7.5,
-      "potential": 9.2,
-      "comment": "Texto curto sobre simetria e pele."
-    }`;
+    const prompt = `Analise estas fotos como um visagista. Retorne APENAS este JSON sem formatação:
+    { "score": 7.5, "potential": 9.2, "comment": "Breve análise técnica." }`;
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     let text = response.text();
 
-    // Limpeza extra para garantir JSON válido
+    // Limpeza do texto da IA
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-    const analysis = JSON.parse(text);
-    res.status(200).json(analysis);
+    
+    try {
+        const analysis = JSON.parse(text);
+        return res.status(200).json(analysis);
+    } catch (e) {
+        throw new Error("A IA respondeu, mas não foi um JSON válido: " + text.substring(0, 50));
+    }
 
   } catch (error) {
-    console.error("Erro Gemini:", error);
-    res.status(500).json({ error: "Erro interno na análise." });
+    console.error("Erro Real:", error);
+    // AQUI ESTÁ A MUDANÇA: Devolvemos a mensagem exata do erro
+    return res.status(500).json({ error: error.message });
   }
 }
