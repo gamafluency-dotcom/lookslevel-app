@@ -13,17 +13,16 @@ export default async function handler(req, res) {
 
   try {
     const { photos } = req.body;
-    if (!photos) throw new Error("Nenhuma foto recebida.");
-
+    // Recupera a chave (que agora sabemos que funciona!)
     const apiKey = process.env.GEMINI_API_KEY;
+    
     if (!apiKey) throw new Error("Chave API não configurada.");
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // --- MUDANÇA ESTRATÉGICA ---
-    // Usando a versão ESPECÍFICA "001". 
-    // Isso evita o erro 404 quando o apelido genérico falha.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+    // MODELO: Usamos o 'gemini-1.5-flash' que é o padrão atual.
+    // Com o package.json atualizado, esse nome VAI ser reconhecido.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const imageParts = photos.map(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
