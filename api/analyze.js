@@ -1,15 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '4mb',
-    },
-  },
+  api: { bodyParser: { sizeLimit: '4mb' } },
 };
 
 export default async function handler(req, res) {
-  // Configuração de Permissões
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -25,24 +20,23 @@ export default async function handler(req, res) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // --- A MUDANÇA ESTÁ AQUI ---
-    // Trocamos 'gemini-pro' (que saiu de linha) por 'gemini-1.5-flash' (o atual)
-    // Como sua chave agora funciona, este modelo vai voar!
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // --- MUDANÇA ESTRATÉGICA ---
+    // Usando a versão ESPECÍFICA "001". 
+    // Isso evita o erro 404 quando o apelido genérico falha.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
 
     const imageParts = photos.map(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
       return { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
     });
 
-    const prompt = `Atue como um visagista especialista. Analise as fotos.
-    Retorne APENAS um JSON válido seguindo estritamente este formato:
+    const prompt = `Atue como um visagista. Analise as fotos.
+    Retorne APENAS um JSON válido neste formato (sem markdown):
     {
-      "score": 7.5,
+      "score": 7.8,
       "potential": 9.4,
-      "comment": "Escreva aqui uma análise técnica de 2 frases sobre o rosto."
-    }
-    Não use Markdown. Não use crases. Apenas o JSON puro.`;
+      "comment": "Análise técnica breve sobre harmonia facial e pele."
+    }`;
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
@@ -53,9 +47,7 @@ export default async function handler(req, res) {
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
-    console.error("Erro Back:", error);
-    res.status(500).json({ 
-        error: `Erro técnico: ${error.message}` 
-    });
+    console.error("Erro Backend:", error);
+    res.status(500).json({ error: `Erro Técnico: ${error.message}` });
   }
 }
