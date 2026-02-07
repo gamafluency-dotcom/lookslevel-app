@@ -7,7 +7,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Configurações de Segurança
+  // Configurações de Segurança (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -22,58 +22,43 @@ export default async function handler(req, res) {
     if (!apiKey) throw new Error('Chave API não configurada.');
 
     // Prepara o conteúdo
-    const contents = [{
-      parts: [
-        { text: `Atue como um visagista. Analise as fotos.
-                 Retorne APENAS um JSON válido (sem markdown):
-                 { "score": 8.7, "potential": 9.9, "comment": "Análise técnica visagista." }` 
-        }
-      ]
-    }];
+    const requestBody = {
+      contents: [{
+        parts: [
+          { text: `Atue como um visagista. Analise as fotos.
+                   Retorne APENAS um JSON válido (sem markdown):
+                   { "score": 8.8, "potential": 9.7, "comment": "Breve análise técnica visagista." }` 
+          }
+        ]
+      }]
+    };
 
     photos.forEach(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
-      contents[0].parts.push({
+      requestBody.contents[0].parts.push({
         inlineData: { mimeType: "image/jpeg", data: base64Data }
       });
     });
 
-    // --- A ESCOLHA EXATA ---
-    // Este nome está EXATAMENTE assim na sua lista de modelos disponíveis.
-    // Ele é a versão "Lite" (leve/grátis) e "001" (estável).
-    const modelName = "gemini-2.0-flash-lite-001";
-    
-    console.log(`Tentando conectar no modelo: ${modelName}`);
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    // --- A ÚLTIMA TENTATIVA GRATUITA ---
+    // Usando o modelo EXPERIMENTAL (exp).
+    // Geralmente o Google libera a cota deste modelo para testes de desenvolvedores.
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       
-      // Se der erro de Cota (429), vamos tentar o PRO EXPERIMENTAL como última esperança
+      // Se der erro 429 aqui também, aí não tem jeito: precisa do cartão.
       if (response.status === 429) {
-          console.log("Cota do Lite excedida. Tentando Pro Experimental...");
-          const backupUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro-exp-02-05:generateContent?key=${apiKey}`;
-          const backupResponse = await fetch(backupUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents })
-          });
-          
-          if (backupResponse.ok) {
-              const dataBackup = await backupResponse.json();
-              let textBackup = dataBackup.candidates[0].content.parts[0].text;
-              textBackup = textBackup.replace(/```json/g, "").replace(/```/g, "").trim();
-              return res.status(200).json(JSON.parse(textBackup));
-          }
+          throw new Error("FIM DA LINHA GRATUITA: O Google bloqueou o acesso temporário por excesso de tentativas. Para resolver definitivo, cadastre o cartão na sua conta do Google Cloud.");
       }
-
+      
       throw new Error(`Erro Google (${response.status}): ${errorData.error?.message}`);
     }
 
@@ -89,6 +74,7 @@ export default async function handler(req, res) {
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
+    console.error("Erro:", error);
     res.status(500).json({ error: `FALHA: ${error.message}` });
   }
 }
