@@ -7,7 +7,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Configuração de Permissões (CORS)
+  // Configurações de Segurança
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,61 +21,80 @@ export default async function handler(req, res) {
     if (!photos) throw new Error('Nenhuma foto recebida.');
     if (!apiKey) throw new Error('Chave API não configurada.');
 
-    const requestBody = {
-      contents: [{
-        parts: [
-          { text: `Atue como um visagista especialista. Analise as fotos enviadas.
-                   Retorne APENAS um JSON válido neste formato (sem markdown):
-                   {
-                     "score": 8.5,
-                     "potential": 9.8,
-                     "comment": "Faça uma análise breve e técnica sobre o rosto."
-                   }` 
-          }
-        ]
-      }]
-    };
+    // Prepara o conteúdo
+    const contents = [{
+      parts: [
+        { text: `Atue como um visagista. Analise as fotos.
+                 Retorne APENAS um JSON válido (sem markdown):
+                 { "score": 8.5, "potential": 9.8, "comment": "Breve análise técnica." }` 
+        }
+      ]
+    }];
 
     photos.forEach(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
-      requestBody.contents[0].parts.push({
+      contents[0].parts.push({
         inlineData: { mimeType: "image/jpeg", data: base64Data }
       });
     });
 
-    // --- MUDANÇA ESTRATÉGICA ---
-    // Trocamos o 'flash' (que estourou a cota) pelo 'flash-lite' (que é feito para ser grátis/leve)
-    // Esse nome estava na sua lista: gemini-2.0-flash-lite-preview-02-05
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
+    // --- LISTA DE MODELOS PARA TENTAR (EM ORDEM) ---
+    // 1. Lite (Nome curto)
+    // 2. Experimental (Geralmente livre de cota zero)
+    // 3. 1.5 Flash (Estável)
+    const modelosParaTentar = [
+        "gemini-2.0-flash-lite", 
+        "gemini-2.0-flash-exp", 
+        "gemini-1.5-flash"
+    ];
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
+    let lastError = null;
+    let resultadoFinal = null;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      // Se der erro de cota de novo (429), avisamos de forma amigável
-      if (response.status === 429) {
-          throw new Error("O Google está congestionado (Erro 429). Tente novamente em 1 minuto.");
-      }
-      throw new Error(`Erro Google (${response.status}): ${errorData.error?.message}`);
+    // LOOP DE TENTATIVAS
+    for (const modelo of modelosParaTentar) {
+        try {
+            console.log(`Tentando modelo: ${modelo}...`);
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents })
+            });
+
+            // Se der erro 404 (Não achou) ou 429 (Cota excedida), lançamos erro para tentar o próximo
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(`Erro ${response.status}: ${errData.error?.message}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0].content) {
+                // SUCESSO! Pegamos o texto e paramos o loop.
+                let text = data.candidates[0].content.parts[0].text;
+                text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+                resultadoFinal = JSON.parse(text);
+                break; // Sai do loop
+            }
+
+        } catch (error) {
+            console.warn(`Falha no modelo ${modelo}: ${error.message}`);
+            lastError = error;
+            // O loop continua para o próximo modelo...
+        }
     }
 
-    const data = await response.json();
-    
-    if (!data.candidates || !data.candidates[0].content) {
-        throw new Error("O Google não retornou texto.");
+    // Se depois de tentar todos, ainda não tivermos resultado:
+    if (!resultadoFinal) {
+        throw new Error(`TODOS OS MODELOS FALHARAM. Último erro: ${lastError?.message}`);
     }
 
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-    res.status(200).json(JSON.parse(text));
+    // Devolve o resultado do vencedor
+    res.status(200).json(resultadoFinal);
 
   } catch (error) {
-    console.error("Erro:", error);
-    res.status(500).json({ error: `FALHA: ${error.message}` });
+    res.status(500).json({ error: `FALHA GERAL: ${error.message}` });
   }
 }
