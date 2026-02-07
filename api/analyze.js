@@ -7,7 +7,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Configuração CORS
+  // Configurações de Segurança
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,18 +21,19 @@ export default async function handler(req, res) {
     if (!photos) throw new Error('Nenhuma foto recebida.');
     if (!apiKey) throw new Error('Chave API não configurada.');
 
-    // Prepara o corpo do pedido
+    // Prepara o JSON para o Gemini
     const requestBody = {
       contents: [{
         parts: [
-          { text: `Atue como um visagista. Analise as fotos.
-                   Responda APENAS com este JSON (sem markdown):
-                   { "score": 7.5, "potential": 9.4, "comment": "Análise técnica breve." }` 
+          { text: `Atue como um visagista profissional. Analise estas fotos.
+                   Responda APENAS com este JSON exato (sem markdown, sem crases):
+                   { "score": 7.5, "potential": 9.4, "comment": "Breve análise técnica sobre o rosto." }` 
           }
         ]
       }]
     };
 
+    // Adiciona as fotos
     photos.forEach(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
       requestBody.contents[0].parts.push({
@@ -40,31 +41,16 @@ export default async function handler(req, res) {
       });
     });
 
-    // --- ESTRATÉGIA DE GUERRA (API v1 ESTÁVEL) ---
+    // --- A MUDANÇA FINAL ---
+    // Usando 'gemini-pro' (Versão 1.0 Clássica).
+    // Esse modelo funciona em 100% das contas, onde o 1.5 pode falhar.
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
     
-    // TENTATIVA 1: Usando a rota OFICIAL (v1) com o modelo padrão
-    // Isso costuma resolver o erro 404 que acontece na v1beta
-    let url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    
-    let response = await fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
-
-    // Se a v1 falhar, tentamos a versão 'legacy' que nunca morre
-    if (!response.ok) {
-      console.log(`v1 Flash falhou (${response.status}). Tentando modelo 001...`);
-      
-      // TENTATIVA 2: Versão específica 001
-      url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`;
-      
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-    }
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -73,9 +59,9 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Extração segura do texto
+    // Extração e Limpeza
     if (!data.candidates || !data.candidates[0].content) {
-        throw new Error("O Google não retornou texto. Tente outra foto.");
+        throw new Error("O Google analisou mas não retornou texto. Tente outra foto.");
     }
 
     let text = data.candidates[0].content.parts[0].text;
@@ -84,6 +70,7 @@ export default async function handler(req, res) {
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
-    res.status(500).json({ error: `FALHA V1: ${error.message}` });
+    // Se der erro, mostramos exatamente o que houve
+    res.status(500).json({ error: `FALHA COMPATIBILIDADE: ${error.message}` });
   }
 }
