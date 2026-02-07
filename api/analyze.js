@@ -5,6 +5,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+  // Configuração de Segurança e Permissões
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -14,28 +15,24 @@ export default async function handler(req, res) {
   try {
     const { photos } = req.body;
     
-    // --- O ESPIÃO DE CHAVE ---
+    // --- VERIFICAÇÃO DE IDENTIDADE DA CHAVE ---
     const apiKey = process.env.GEMINI_API_KEY;
     
-    // 1. Se estiver vazia
     if (!apiKey) {
-        throw new Error("A variável GEMINI_API_KEY está VAZIA/NULL.");
+        throw new Error("ERRO: Nenhuma chave encontrada. A variável sumiu.");
     }
 
-    // 2. Análise forense da chave (sem mostrar a chave inteira por segurança)
-    const tamanho = apiKey.length;
-    const primeiraLetra = apiKey.charAt(0);
-    const ultimaLetra = apiKey.charAt(tamanho - 1);
-    const temAspas = apiKey.includes('"') || apiKey.includes("'");
-    const temEspaco = apiKey.includes(' ');
+    // O código olha a última letra da senha
+    const ultimaLetra = apiKey.charAt(apiKey.length - 1);
 
-    // Se tiver aspas ou espaço, o erro vai avisar
-    if (temAspas) throw new Error(`ERRO DE FORMATACAO: A chave tem aspas (")! Apague e cole apenas o código.`);
-    if (temEspaco) throw new Error(`ERRO DE FORMATACAO: A chave tem espaços em branco! Verifique o final dela.`);
-    
-    // --- Fim do Espião ---
+    // Se a última letra for 'I', ele SABE que é a chave velha
+    if (ultimaLetra === 'I') {
+        throw new Error("ERRO DE CACHE: O Vercel ainda está usando a chave ANTIGA (final 'I'). Vá em Settings > Environment Variables, Edite a chave, MARQUE a caixinha 'Production' e Salve.");
+    }
+    // -------------------------------------------
 
     const genAI = new GoogleGenerativeAI(apiKey);
+    // Usando o modelo mais estável para garantir
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const imageParts = photos.map(photoStr => {
@@ -43,7 +40,9 @@ export default async function handler(req, res) {
       return { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
     });
 
-    const prompt = `Analise estas fotos como um visagista. Retorne APENAS um JSON: { "score": 7.5, "potential": 9.2, "comment": "Análise feita." }`;
+    const prompt = `Analise estas fotos como um visagista profissional. 
+    Retorne APENAS um JSON válido (sem markdown) neste formato exato:
+    { "score": 7.4, "potential": 9.2, "comment": "Comentário técnico breve sobre o rosto." }`;
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
@@ -52,10 +51,12 @@ export default async function handler(req, res) {
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
-    // Se o erro for do Google, mostramos o diagnóstico do Espião
-    const apiKey = process.env.GEMINI_API_KEY || "";
+    const k = process.env.GEMINI_API_KEY || "";
+    const final = k.length > 0 ? k.charAt(k.length - 1) : "VAZIO";
+    
+    // Mostra na tela qual chave está sendo usada
     res.status(500).json({ 
-        error: `DIAGNÓSTICO: A chave lida tem ${apiKey.length} caracteres. Começa com '${apiKey.charAt(0)}' e termina com '${apiKey.charAt(apiKey.length - 1)}'. Mensagem original: ${error.message}` 
+        error: `STATUS ATUAL: O site está lendo uma chave que termina com '${final}'. Erro técnico: ${error.message}` 
     });
   }
 }
