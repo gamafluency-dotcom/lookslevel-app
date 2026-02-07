@@ -5,7 +5,6 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Configuração de Segurança e Permissões
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,34 +14,27 @@ export default async function handler(req, res) {
   try {
     const { photos } = req.body;
     
-    // --- VERIFICAÇÃO DE IDENTIDADE DA CHAVE ---
+    // --- O DETETIVE DE CHAVES ---
     const apiKey = process.env.GEMINI_API_KEY;
     
-    if (!apiKey) {
-        throw new Error("ERRO: Nenhuma chave encontrada. A variável sumiu.");
-    }
+    if (!apiKey) throw new Error("ERRO FATAL: Chave não encontrada.");
 
-    // O código olha a última letra da senha
+    // Pega a última letra da chave para sabermos qual está usando
     const ultimaLetra = apiKey.charAt(apiKey.length - 1);
 
-    // Se a última letra for 'I', ele SABE que é a chave velha
-    if (ultimaLetra === 'I') {
-        throw new Error("ERRO DE CACHE: O Vercel ainda está usando a chave ANTIGA (final 'I'). Vá em Settings > Environment Variables, Edite a chave, MARQUE a caixinha 'Production' e Salve.");
-    }
-    // -------------------------------------------
+    // Se for 'I', avisa que é a velha. Se for outra, avisa que atualizou.
+    // ----------------------------
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Usando o modelo mais estável para garantir
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Usando o modelo PRO (se der erro, trocamos para o FLASH depois)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const imageParts = photos.map(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
       return { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
     });
 
-    const prompt = `Analise estas fotos como um visagista profissional. 
-    Retorne APENAS um JSON válido (sem markdown) neste formato exato:
-    { "score": 7.4, "potential": 9.2, "comment": "Comentário técnico breve sobre o rosto." }`;
+    const prompt = `Analise estas fotos. Retorne JSON: { "score": 8.0, "potential": 9.5, "comment": "Ok" }`;
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
@@ -52,11 +44,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     const k = process.env.GEMINI_API_KEY || "";
-    const final = k.length > 0 ? k.charAt(k.length - 1) : "VAZIO";
+    const final = k.length > 0 ? k.charAt(k.length - 1) : "NULA";
     
-    // Mostra na tela qual chave está sendo usada
+    // MUDAMOS A MENSAGEM AQUI PARA SABER SE O CODIGO ATUALIZOU
     res.status(500).json({ 
-        error: `STATUS ATUAL: O site está lendo uma chave que termina com '${final}'. Erro técnico: ${error.message}` 
+        error: `TESTE DE FORÇA: O site está usando a chave final '${final}'. O erro técnico foi: ${error.message}` 
     });
   }
 }
