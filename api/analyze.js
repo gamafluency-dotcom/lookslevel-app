@@ -14,19 +14,26 @@ export default async function handler(req, res) {
   try {
     const { photos } = req.body;
     
-    // --- DIAGNÓSTICO DA CHAVE ---
+    // --- O ESPIÃO DE CHAVE ---
     const apiKey = process.env.GEMINI_API_KEY;
     
-    // Teste 1: A chave existe?
+    // 1. Se estiver vazia
     if (!apiKey) {
-        throw new Error("ERRO GRAVE: A variável GEMINI_API_KEY não foi encontrada na Vercel. Verifique se o nome está correto e se marcou 'Production'.");
+        throw new Error("A variável GEMINI_API_KEY está VAZIA/NULL.");
     }
+
+    // 2. Análise forense da chave (sem mostrar a chave inteira por segurança)
+    const tamanho = apiKey.length;
+    const primeiraLetra = apiKey.charAt(0);
+    const ultimaLetra = apiKey.charAt(tamanho - 1);
+    const temAspas = apiKey.includes('"') || apiKey.includes("'");
+    const temEspaco = apiKey.includes(' ');
+
+    // Se tiver aspas ou espaço, o erro vai avisar
+    if (temAspas) throw new Error(`ERRO DE FORMATACAO: A chave tem aspas (")! Apague e cole apenas o código.`);
+    if (temEspaco) throw new Error(`ERRO DE FORMATACAO: A chave tem espaços em branco! Verifique o final dela.`);
     
-    // Teste 2: A chave parece válida?
-    if (apiKey.startsWith('"') || apiKey.includes(' ')) {
-        throw new Error("ERRO DE FORMATAÇÃO: A chave contém espaços ou aspas. Apague e cole apenas o código 'AIza...'.");
-    }
-    // ---------------------------
+    // --- Fim do Espião ---
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -36,7 +43,7 @@ export default async function handler(req, res) {
       return { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
     });
 
-    const prompt = `Analise estas fotos como um visagista. Retorne APENAS um JSON: { "score": 7.5, "potential": 9.2, "comment": "Breve análise." }`;
+    const prompt = `Analise estas fotos como um visagista. Retorne APENAS um JSON: { "score": 7.5, "potential": 9.2, "comment": "Análise feita." }`;
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
@@ -45,6 +52,10 @@ export default async function handler(req, res) {
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
-    res.status(500).json({ error: `DEBUG: ${error.message}` });
+    // Se o erro for do Google, mostramos o diagnóstico do Espião
+    const apiKey = process.env.GEMINI_API_KEY || "";
+    res.status(500).json({ 
+        error: `DIAGNÓSTICO: A chave lida tem ${apiKey.length} caracteres. Começa com '${apiKey.charAt(0)}' e termina com '${apiKey.charAt(apiKey.length - 1)}'. Mensagem original: ${error.message}` 
+    });
   }
 }
