@@ -1,15 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '4mb',
-    },
-  },
+  api: { bodyParser: { sizeLimit: '4mb' } },
 };
 
 export default async function handler(req, res) {
-  // Configuração CORS (Permissões de acesso)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -18,12 +13,22 @@ export default async function handler(req, res) {
 
   try {
     const { photos } = req.body;
-    if (!photos) throw new Error('Nenhuma foto recebida.');
-
-    // Inicializa o Google
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    // MUDANÇA FINAL: Usando o modelo clássico "gemini-pro" que nunca falha
+    // --- DIAGNÓSTICO DA CHAVE ---
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    // Teste 1: A chave existe?
+    if (!apiKey) {
+        throw new Error("ERRO GRAVE: A variável GEMINI_API_KEY não foi encontrada na Vercel. Verifique se o nome está correto e se marcou 'Production'.");
+    }
+    
+    // Teste 2: A chave parece válida?
+    if (apiKey.startsWith('"') || apiKey.includes(' ')) {
+        throw new Error("ERRO DE FORMATAÇÃO: A chave contém espaços ou aspas. Apague e cole apenas o código 'AIza...'.");
+    }
+    // ---------------------------
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const imageParts = photos.map(photoStr => {
@@ -31,9 +36,7 @@ export default async function handler(req, res) {
       return { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
     });
 
-    const prompt = `Analise estas fotos como um visagista. 
-    Retorne APENAS um JSON válido neste formato, sem markdown:
-    { "score": 7.5, "potential": 9.2, "comment": "Breve análise técnica sobre o rosto." }`;
+    const prompt = `Analise estas fotos como um visagista. Retorne APENAS um JSON: { "score": 7.5, "potential": 9.2, "comment": "Breve análise." }`;
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
@@ -42,7 +45,6 @@ export default async function handler(req, res) {
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
-    console.error("Erro:", error);
-    res.status(500).json({ error: `ERRO NA ANÁLISE: ${error.message}` });
+    res.status(500).json({ error: `DEBUG: ${error.message}` });
   }
 }
