@@ -9,51 +9,32 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // 1. Configuração de Permissões (CORS)
+  // Configuração de Permissões
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder a testes de conexão
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // 2. Validação Básica
-    if (req.method !== 'POST') {
-        throw new Error("Método inválido. Use POST.");
-    }
-
     const { photos } = req.body;
-    if (!photos || photos.length === 0) {
-        throw new Error("Nenhuma foto foi recebida pelo servidor.");
-    }
+    if (!photos) throw new Error("Nenhuma foto recebida.");
 
-    // 3. Recuperar a Chave (Sem mostrar no erro)
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        throw new Error("Erro de Configuração: Chave API não encontrada no servidor.");
-    }
+    if (!apiKey) throw new Error("Chave API não configurada.");
 
-    // 4. Conectar na IA
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // USANDO 'gemini-pro' (O mais estável, evita erro 404 de modelo)
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // --- A MUDANÇA ESTÁ AQUI ---
+    // Trocamos 'gemini-pro' (que saiu de linha) por 'gemini-1.5-flash' (o atual)
+    // Como sua chave agora funciona, este modelo vai voar!
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // 5. Preparar Imagens
     const imageParts = photos.map(photoStr => {
       const base64Data = photoStr.includes(',') ? photoStr.split(',')[1] : photoStr;
-      return {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/jpeg",
-        },
-      };
+      return { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
     });
 
-    // 6. O Pedido (Prompt)
     const prompt = `Atue como um visagista especialista. Analise as fotos.
     Retorne APENAS um JSON válido seguindo estritamente este formato:
     {
@@ -63,22 +44,18 @@ export default async function handler(req, res) {
     }
     Não use Markdown. Não use crases. Apenas o JSON puro.`;
 
-    // 7. Executar
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     let text = response.text();
 
-    // Limpeza de segurança para garantir JSON
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    // Devolver ao site
     res.status(200).json(JSON.parse(text));
 
   } catch (error) {
-    console.error("Erro no Backend:", error);
-    // Erro genérico para o usuário, erro técnico no console
+    console.error("Erro Back:", error);
     res.status(500).json({ 
-        error: `Erro ao processar análise. Detalhe técnico: ${error.message}` 
+        error: `Erro técnico: ${error.message}` 
     });
   }
 }
