@@ -2,8 +2,10 @@
   "name": "lookslevel-app",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "scripts": {
+    "start": "node api/analyze.js"
+  },
   "dependencies": {
-    "@google/generative-ai": "latest"
+    "node-fetch": "^3.3.0"
   }
 }
