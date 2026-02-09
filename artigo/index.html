@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O real impacto da beleza | LooksLevel</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0F0F0F',
+                            card: '#1F1F1F',
+                            border: '#333333'
+                        },
+                        brand: {
+                            red: '#FF0033',
+                            deep: '#8A0303',
+                            text: '#E0E0E0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .gradient-text {
+            background: linear-gradient(to r, #FF0033, #8A0303);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .source-tag {
+            font-size: 0.7rem;
+            color: #666;
+            vertical-align: super;
+            margin-left: 3px;
+            text-decoration: underline;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #FF0033;
+        }
+
+        .ref-link:hover {
+            color: #FF0033;
+            text-decoration: underline;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0F0F0F; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF0033; }
+    </style>
+</head>
+<body class="bg-dark-bg text-brand-text antialiased">
+
+    <header class="sticky top-0 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-xl md:text-2xl font-bold text-white tracking-tight">
+                <span class="gradient-text">O real impacto da beleza</span>
+            </h1>
+            <a href="/" class="text-sm font-bold text-gray-400 hover:text-white transition">LooksLevel</a>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-12">
+        
+        <section class="text-center mb-16">
+            <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                Os dados são claros, mesmo que desconfortáveis. Agregamos pesquisas de psicologia, economia e análise facial por IA para mostrar exatamente como o "Efeito Halo" dita resultados.
+            </p>
+        </section>
+
+        <div class="grid grid-cols-12 gap-6">
+
+            <div class="col-span-12 mt-8">
+                <div class="flex items-center gap-3 border-b border-dark-border pb-4 mb-6">
+                    <i class="fas fa-graduation-cap text-brand-red text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white">1. Educação</h2>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 bg-dark-card border border-dark-border p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">Notas Melhores <a href="https://academic.oup.com/qje/article-abstract/137/3/1359/6524581" target="_blank" class="source-tag ref-link">[18]</a></h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Estudos comprovam que alunos atraentes recebem notas consistentemente mais altas em avaliações presenciais, evidenciando o viés inconsciente de educadores.</p>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 bg-dark-card border border-dark-border p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">Expectativa Docente <a href="https://www.researchgate.net/publication/232537237_Physical_Attractiveness_and_Teacher_Expectations" target="_blank" class="source-tag ref-link">[16]</a></h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Professores tendem a criar expectativas mais altas de inteligência e comportamento para alunos considerados mais atraentes desde o jardim de infância.</p>
+            </div>
+
+            <div class="col-span-12 mt-12">
+                <div class="flex items-center gap-3 border-b border-dark-border pb-4 mb-6">
+                    <i class="fas fa-users text-brand-red text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white">2. Percepção Social & Dating</h2>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-4 bg-dark-card border border-brand-red/30 p-8 rounded-2xl text-center">
+                <h3 class="text-lg font-bold text-white mb-4">Apps de Namoro <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4043335/" target="_blank" class="source-tag ref-link">[5]</a></h3>
+                <div class="text-4xl font-black text-brand-red mb-4">9:1</div>
+                <p class="text-gray-400 text-xs">A aparência visual é 9x mais determinante para a decisão de um "match" do que o status socioeconômico ou biografia.</p>
+            </div>
+
+            <div class="col-span-12 md:col-span-8 bg-dark-card border border-dark-border p-8 rounded-2xl">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold text-white mb-1">Confiança <a href="https://psycnet.apa.org/record/1972-23053-001" target="_blank" class="source-tag ref-link">[12]</a></h4>
+                        <p class="text-gray-500 text-xs">O cérebro associa automaticamente "beleza" com integridade moral e sociabilidade.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white mb-1">Saúde <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5453086/" target="_blank" class="source-tag ref-link">[10]</a></h4>
+                        <p class="text-gray-500 text-xs">A simetria e clareza facial são percebidas instintivamente como indicadores de resistência genética e saúde.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 mt-12">
+                <div class="flex items-center gap-3 border-b border-dark-border pb-4 mb-6">
+                    <i class="fas fa-briefcase text-brand-red text-xl"></i>
+                    <h2 class="text-2xl font-bold text-white">3. Carreira & Economia</h2>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 bg-dark-card border border-dark-border p-6 rounded-2xl flex items-center gap-6">
+                <div class="stat-value">+15%</div>
+                <div>
+                    <h3 class="font-bold text-white">Bônus Salarial <a href="https://www.nber.org/papers/w4518" target="_blank" class="source-tag ref-link">[1]</a></h3>
+                    <p class="text-gray-500 text-xs">A "taxa da beleza" reflete ganhos anuais superiores para indivíduos acima da média estética.</p>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 bg-dark-card border border-dark-border p-6 rounded-2xl flex items-center gap-6">
+                <div class="stat-value">+55%</div>
+                <div>
+                    <h3 class="font-bold text-white">Sucesso em Vendas <a href="https://www.jstor.org/stable/2353112" target="_blank" class="source-tag ref-link">[4]</a></h3>
+                    <p class="text-gray-500 text-xs">Vendedores atraentes geram maior confiança imediata, resultando em conversões significativamente maiores.</p>
+                </div>
+            </div>
+
+            <div class="col-span-12 mt-16 bg-gradient-to-r from-brand-red/10 to-brand-deep/10 border border-brand-red/30 p-10 rounded-[2.5rem] text-center">
+                <h3 class="text-2xl md:text-3xl font-bold text-white mb-6">O que você faz com isso?</h3>
+                <p class="text-gray-300 max-w-3xl mx-auto mb-8 text-lg leading-relaxed">
+                    A realidade é desconfortável, mas os dados são claros. Não fornecemos esses números para desanimar você — fornecemos porque entender sua nota no <strong>LooksLevel</strong> é o primeiro passo para dominar a percepção humana e mais do ter um glow-up, mudar de vida.
+                </p>
+                <a href="https://lookslevel.netlify.app/" class="inline-block bg-gradient-to-r from-brand-red to-brand-deep text-white font-black py-4 px-10 rounded-xl shadow-[0_0_20px_rgba(255,0,51,0.4)] hover:scale-105 transition transform">
+                    Descobrir minha nota de 0-10 AGORA <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+        </div>
+
+        <footer class="mt-20 pt-10 border-t border-dark-border">
+            <h4 class="text-white font-bold mb-6">Fontes Acadêmicas Clicáveis</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] text-gray-500">
+                <a href="https://www.nber.org/papers/w4518" target="_blank" class="ref-link">[1] Hamermesh & Biddle - Beauty and the Labor Market</a>
+                <a href="https://www.jstor.org/stable/2353112" target="_blank" class="ref-link">[4] Reingen & Kernan - Social Perception and Interpersonal Influence</a>
+                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4043335/" target="_blank" class="ref-link">[5] Journal of Family Theory & Review - Dating & Physical Attraction</a>
+                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5453086/" target="_blank" class="ref-link">[10] Zebrowitz - The Human Face as a Health Signal</a>
+                <a href="https://psycnet.apa.org/record/1972-23053-001" target="_blank" class="ref-link">[12] Dion et al. - What is beautiful is good</a>
+                <a href="https://www.researchgate.net/publication/232537237_Physical_Attractiveness_and_Teacher_Expectations" target="_blank" class="ref-link">[16] Journal of Educational Psychology - Teacher Expectations</a>
+                <a href="https://academic.oup.com/qje/article-abstract/137/3/1359/6524581" target="_blank" class="ref-link">[18] Oxford Academic - Appearance and Academic Performance</a>
+                <a href="https://www.jstor.org/stable/2094931" target="_blank" class="ref-link">[19] Attractiveness and Criminal Justice Processing</a>
+            </div>
+            <div class="mt-12 text-center text-xs text-gray-600 font-medium">
+                © 2026 LooksLevel.com.br / Todos os direitos reservados.
+            </div>
+        </footer>
+    </main>
+
+</body>
+</html>
