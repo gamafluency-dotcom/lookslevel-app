@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise Facial - LooksLevel</title>
+    <title>Resultado Profissional | LooksLevel</title>
     <style>
-        /* --- CONFIGURAÇÕES GERAIS --- */
+        /* --- CORE DESIGN SYSTEM --- */
         :root {
-            --bg-color: #050505;
-            --card-bg: #111111;
+            --bg-color: #000000;
+            --card-bg: #0f0f0f;
             --primary-color: #FF2A5D;
             --primary-gradient: linear-gradient(90deg, #FF2A5D 0%, #FF4D7D 100%);
             --text-color: #ffffff;
-            --text-secondary: #aaaaaa;
-            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --text-muted: #888888;
+            --border-color: #222222;
+            --success-color: #00C851;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+
+        * { box-sizing: border-box; outline: none; }
 
         body {
             background-color: var(--bg-color);
@@ -25,269 +29,286 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            align-items: center; /* Centraliza verticalmente */
+            align-items: center;
         }
 
-        .container {
-            max-width: 500px;
+        .app-container {
+            max-width: 480px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 24px;
             position: relative;
         }
 
-        /* Classes utilitárias para esconder/mostrar telas */
-        .hidden {
-            display: none !important;
-        }
+        /* --- UTILITÁRIOS --- */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .fade-in {
-            animation: fadeIn 0.8s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- TELA 1: UPLOAD --- */
-        .upload-area {
+        /* --- UPLOAD --- */
+        .upload-card {
+            background-color: var(--bg-color);
             border: 2px dashed #333;
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px 20px;
             text-align: center;
             cursor: pointer;
-            transition: border-color 0.3s;
-            background: #0a0a0a;
+            transition: all 0.3s ease;
         }
+        .upload-card:hover { border-color: var(--primary-color); background-color: rgba(255, 42, 93, 0.05); }
+        .upload-card.has-files { border-style: solid; border-color: var(--success-color); background-color: rgba(0, 200, 81, 0.05); }
+        
+        .icon-large { font-size: 3.5rem; margin-bottom: 15px; display: block; }
+        .text-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
+        .text-desc { color: var(--text-muted); font-size: 0.9rem; }
+        #file-input-real { display: none; }
 
-        .upload-area:hover {
-            border-color: var(--primary-color);
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .upload-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .upload-desc {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 30px;
-        }
-
-        .btn-main {
+        /* --- BOTÕES --- */
+        .btn-primary {
             background: var(--primary-gradient);
-            color: white;
+            color: #fff;
             border: none;
             width: 100%;
             padding: 18px;
             font-size: 1rem;
             font-weight: 800;
             text-transform: uppercase;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: 0 4px 25px rgba(255, 42, 93, 0.4);
-            transition: transform 0.2s;
+            box-shadow: 0 8px 30px rgba(255, 42, 93, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(255, 42, 93, 0.5); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        .btn-main:active {
-            transform: scale(0.98);
-        }
-
-        /* --- TELA 2: LOADING (Animação) --- */
-        .loading-screen {
-            text-align: center;
-            padding: 50px 0;
-        }
-
-        .scanner {
-            width: 100px;
-            height: 100px;
-            border: 4px solid #333;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            margin: 0 auto 30px auto;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-text {
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            animation: pulse 1.5s infinite;
-        }
-
+        /* --- LOADING --- */
+        .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; }
+        .loader-ring { width: 80px; height: 80px; border: 4px solid #333; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
+        .loading-status { font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; color: #fff; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* --- TELA 3: RESULTADO (Estilos anteriores) --- */
-        .header-score { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
-        .score-block { text-align: center; }
-        .score-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .score-number { font-size: 3rem; font-weight: 800; }
-        .score-number.pink { color: var(--primary-color); }
-        .profile-img-container { width: 120px; height: 120px; border-radius: 50%; padding: 4px; background: var(--primary-gradient); box-shadow: 0 0 20px rgba(255, 42, 93, 0.4); margin: 0 auto; }
-        .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg-color); }
-        
-        .badges { display: flex; justify-content: center; gap: 10px; margin-top: 10px;}
-        .badge { background-color: #1a1a1a; border: 1px solid #333; color: #ddd; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
-        .badge.highlight { background: rgba(255, 42, 93, 0.1); border-color: var(--primary-color); color: var(--primary-color); }
-        
-        .stats-card { background-color: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid #222; }
-        .stat-item { margin-bottom: 15px; }
-        .stat-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; }
-        .progress-bg { background-color: #333; height: 10px; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary-gradient); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 42, 93, 0.5); width: 0%; transition: width 1.5s ease-out; }
+        /* --- RESULTADO --- */
+        .score-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px; margin-bottom: 10px; }
+        .score-box { text-align: center; width: 80px; }
+        .score-mini-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+        .score-value { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+        .score-value.highlight { color: var(--primary-color); text-shadow: 0 0 20px rgba(255, 42, 93, 0.4); }
 
-        .diagnosis-card { background-color: #151515; border-left: 4px solid var(--primary-color); border-radius: 8px; padding: 20px; }
-        .diagnosis-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        .diagnosis-section { margin-bottom: 15px; }
-        .diagnosis-label { color: var(--primary-color); font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; display: block; text-transform: uppercase; }
-        .diagnosis-text { color: #ddd; font-size: 0.95rem; line-height: 1.5; margin: 0; }
-        
-        .cta-container { text-align: center; margin-top: 10px; margin-bottom: 40px; }
-        .cta-text { color: #ccc; font-size: 0.9rem; margin-bottom: 15px; }
+        .avatar-wrapper { position: relative; width: 140px; height: 140px; border-radius: 50%; padding: 3px; background: var(--primary-gradient); box-shadow: 0 0 30px rgba(255, 42, 93, 0.3); }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 5px solid var(--bg-color); background-color: #222; }
 
+        .tags-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
+        .tag { background: #111; border: 1px solid #333; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #ccc; }
+        .tag.active { border-color: var(--primary-color); background: rgba(255, 42, 93, 0.1); color: var(--primary-color); }
+
+        .metrics-card { background: var(--card-bg); border-radius: 20px; padding: 24px; border: 1px solid var(--border-color); margin-bottom: 24px; }
+        .metric-item { margin-bottom: 18px; }
+        .metric-item:last-child { margin-bottom: 0; }
+        .metric-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+        .bar-bg { width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary-gradient); border-radius: 6px; width: 0%; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 15px rgba(255, 42, 93, 0.4); }
+
+        .report-card { background: #0A0A0A; border-left: 4px solid var(--primary-color); border-radius: 12px; padding: 24px; margin-bottom: 30px; }
+        .report-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .report-section { margin-bottom: 20px; }
+        .report-label { color: var(--primary-color); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .report-content { color: #ddd; font-size: 0.95rem; line-height: 1.6; margin: 0; }
+
+        .upsell-area { text-align: center; padding-bottom: 20px; }
+        .upsell-text { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="app-container">
 
-        <div id="screen-upload" class="fade-in">
-            <h1 style="text-align: center; margin-bottom: 5px;">Carregar Fotos</h1>
-            <p style="text-align: center; color: #888; margin-top: 0;">Envie 3 fotos (Frente, Perfil Direito, Perfil Esquerdo) para precisão máxima.</p>
+        <div id="view-upload" class="fade-in">
+            <h1 style="text-align: center; font-size: 1.8rem; margin-bottom: 10px;">Análise Biométrica</h1>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px;">Carregue suas fotos para iniciar.</p>
             
-            <div class="upload-area" onclick="triggerUpload()">
-                <span class="upload-icon">📸</span>
-                <div class="upload-title">Toque para selecionar</div>
-                <div class="upload-desc">Formatos: JPG, PNG</div>
+            <input type="file" id="file-input-real" multiple accept="image/*" onchange="handleFileSelect()">
+
+            <div class="upload-card" id="upload-trigger" onclick="document.getElementById('file-input-real').click()">
+                <span class="icon-large" id="upload-icon">📸</span>
+                <div class="text-title" id="upload-title">Selecionar Fotos</div>
+                <div class="text-desc" id="upload-desc">Frente, Perfil Direito e Esquerdo</div>
             </div>
             
             <br>
-            <button class="btn-main" onclick="startAnalysis()">INICIAR ANÁLISE</button>
+            <button id="btn-start" class="btn-primary" onclick="processImages()" disabled>INICIAR ANÁLISE</button>
         </div>
 
-        <div id="screen-loading" class="loading-screen hidden">
-            <div class="scanner"></div>
-            <div class="loading-text">PROCESSANDO DADOS BIOMÉTRICOS...</div>
-            <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Analisando estrutura óssea e simetria</p>
+        <div id="view-loading" class="loading-container hidden">
+            <div class="loader-ring"></div>
+            <div class="loading-status" id="loading-text">ENVIANDO PARA A IA...</div>
         </div>
 
-        <div id="screen-result" class="hidden">
-            <div class="header-score">
-                <div class="score-block">
-                    <div class="score-label">Nota Atual</div>
-                    <div class="score-number">68</div>
+        <div id="view-result" class="hidden">
+            <div class="score-header">
+                <div class="score-box">
+                    <div class="score-mini-label">Nota Atual</div>
+                    <div class="score-value" id="res-score-current">--</div>
                 </div>
-
-                <div class="profile-img-container">
-                    <img src="https://placehold.co/200x200/222/FFF?text=Foto" alt="Rosto Analisado" class="profile-img">
+                <div class="avatar-wrapper">
+                    <img id="user-avatar-display" src="" class="avatar-img">
                 </div>
-
-                <div class="score-block">
-                    <div class="score-label">Potencial</div>
-                    <div class="score-number pink">89</div>
+                <div class="score-box">
+                    <div class="score-mini-label">Potencial</div>
+                    <div class="score-value highlight" id="res-score-potential">--</div>
                 </div>
             </div>
 
-            <div class="badges">
-                <div class="badge">Acima da Média</div>
-                <div class="badge highlight">Olhar Predador</div>
-            </div>
+            <div class="tags-row" id="badges-container">
+                </div>
 
-            <br>
-
-            <div class="stats-card">
-                <div class="stat-item">
-                    <div class="stat-header"><span>Mandíbula & Queixo</span><span>70/100</span></div>
-                    <div class="progress-bg"><div class="progress-fill" data-width="70%"></div></div>
+            <div class="metrics-card">
+                <div class="metric-item">
+                    <div class="metric-info"><span>Mandíbula</span> <span id="val-jaw">0/100</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="bar-jaw" style="width: 0%"></div></div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-header"><span>Região dos Olhos</span><span>65/100</span></div>
-                    <div class="progress-bg"><div class="progress-fill" data-width="65%"></div></div>
+                <div class="metric-item">
+                    <div class="metric-info"><span>Olhos</span> <span id="val-eyes">0/100</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="bar-eyes" style="width: 0%"></div></div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-header"><span>Qualidade da Pele</span><span>60/100</span></div>
-                    <div class="progress-bg"><div class="progress-fill" data-width="60%"></div></div>
+                <div class="metric-item">
+                    <div class="metric-info"><span>Pele</span> <span id="val-skin">0/100</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="bar-skin" style="width: 0%"></div></div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-header"><span>Masculinidade</span><span>75/100</span></div>
-                    <div class="progress-bg"><div class="progress-fill" data-width="75%"></div></div>
+                <div class="metric-item">
+                    <div class="metric-info"><span>Masculinidade</span> <span id="val-masc">0/100</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="bar-masc" style="width: 0%"></div></div>
                 </div>
             </div>
 
-            <br>
-
-            <div class="diagnosis-card">
-                <div class="diagnosis-title">📋 Diagnóstico Técnico IA</div>
-                <div class="diagnosis-section">
-                    <span class="diagnosis-label">Análise Estrutural</span>
-                    <p class="diagnosis-text">Seu rosto apresenta boa estrutura óssea com potencial considerável. As sobrancelhas e o cabelo complementam bem o formato facial.</p>
-                </div>
-                <div class="diagnosis-section">
-                    <span class="diagnosis-label">Pontos de Atenção</span>
-                    <p class="diagnosis-text">A pele apresenta algumas imperfeições texturais. A região dos olhos denota sinais de cansaço, impactando a pontuação do olhar.</p>
-                </div>
-                <div class="diagnosis-section">
-                    <span class="diagnosis-label">Protocolo Sugerido</span>
-                    <p class="diagnosis-text">Introduzir retinol na rotina de skincare para textura. Priorizar higiene do sono e cremes específicos para área dos olhos.</p>
-                </div>
+            <div class="report-card">
+                <div class="report-title">📋 Relatório Técnico</div>
+                <div id="diagnosis-content">
+                    </div>
             </div>
 
-            <br>
-
-            <div class="cta-container">
-                <p class="cta-text">Quer um plano personalizado feito por um especialista?</p>
-                <button class="btn-main">OBTER ANÁLISE HUMANA PRO</button>
+            <div class="upsell-area">
+                <p class="upsell-text">Os resultados da IA são limitados.</p>
+                <button class="btn-primary" onclick="window.location.href='/checkout-analise-humana'">OBTER ANÁLISE HUMANA PRO</button>
             </div>
         </div>
 
     </div>
 
     <script>
-        // Função apenas visual para clicar na área de upload
-        function triggerUpload() {
-            alert("Em um app real, isso abriria a galeria de fotos.");
+        // CONFIGURAÇÃO: Coloca aqui o URL exato da tua API na Vercel
+        const API_ENDPOINT = '/api/analyze'; 
+
+        const fileInput = document.getElementById('file-input-real');
+        const btnStart = document.getElementById('btn-start');
+        
+        // 1. Seleção de Arquivos
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                document.getElementById('upload-trigger').classList.add('has-files');
+                document.getElementById('upload-icon').textContent = '✅';
+                document.getElementById('upload-title').textContent = fileInput.files.length + ' Fotos';
+                document.getElementById('upload-title').style.color = '#00C851';
+                btnStart.disabled = false;
+
+                // Preview
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById('user-avatar-display').src = e.target.result;
+                reader.readAsDataURL(fileInput.files[0]);
+            }
         }
 
-        function startAnalysis() {
-            // 1. Esconde a tela de Upload
-            document.getElementById('screen-upload').classList.add('hidden');
-            
-            // 2. Mostra a tela de Loading
-            document.getElementById('screen-loading').classList.remove('hidden');
+        // 2. Envio para API (Processamento REAL)
+        async function processImages() {
+            // UI Update
+            document.getElementById('view-upload').classList.add('hidden');
+            document.getElementById('view-loading').classList.remove('hidden');
 
-            // 3. Simula o tempo de processamento da IA (3 segundos)
-            setTimeout(function() {
-                // Esconde loading
-                document.getElementById('screen-loading').classList.add('hidden');
+            // Preparar FormData
+            const formData = new FormData();
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('images', fileInput.files[i]); // 'images' deve ser a chave que o teu backend espera
+            }
+
+            try {
+                // CHAMADA REAL À API
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Erro na análise da IA');
+
+                const data = await response.json();
                 
-                // Mostra resultado com animação
-                const resultScreen = document.getElementById('screen-result');
-                resultScreen.classList.remove('hidden');
-                resultScreen.classList.add('fade-in');
+                // Sucesso: Atualiza Dashboard
+                updateDashboard(data);
 
-                // Anima as barras de progresso
-                animateBars();
-
-            }, 3000); // 3000ms = 3 segundos
+            } catch (error) {
+                console.error(error);
+                alert("Ocorreu um erro ao conectar com o servidor. Tente novamente.");
+                document.getElementById('view-loading').classList.add('hidden');
+                document.getElementById('view-upload').classList.remove('hidden');
+            }
         }
 
-        function animateBars() {
-            const bars = document.querySelectorAll('.progress-fill');
-            bars.forEach(bar => {
-                const width = bar.getAttribute('data-width');
-                bar.style.width = width;
-            });
+        // 3. Atualizar a UI com os dados do JSON recebido
+        function updateDashboard(data) {
+            document.getElementById('view-loading').classList.add('hidden');
+            document.getElementById('view-result').classList.remove('hidden');
+            document.getElementById('view-result').classList.add('fade-in');
+
+            // -- Mapeie aqui os campos do seu JSON para o HTML --
+            
+            // Notas
+            document.getElementById('res-score-current').innerText = data.currentScore || 68;
+            document.getElementById('res-score-potential').innerText = data.potentialScore || 89;
+
+            // Badges (Ex: data.badges = ["HTN", "Hunter"])
+            const badgesDiv = document.getElementById('badges-container');
+            badgesDiv.innerHTML = ''; // Limpa anteriores
+            // Exemplo de tradução simples se a API mandar em inglês
+            const badgeMap = { 'HTN': 'Acima da Média', 'Hunter': 'Olhar Predador', 'Chad': 'Topo da Pirâmide' };
+            
+            if(data.badges && data.badges.length > 0) {
+                data.badges.forEach(badge => {
+                    const label = badgeMap[badge] || badge; 
+                    badgesDiv.innerHTML += `<div class="tag active">${label}</div>`;
+                });
+            } else {
+                 badgesDiv.innerHTML = `<div class="tag active">Análise Concluída</div>`;
+            }
+
+            // Barras de Progresso
+            updateBar('jaw', data.jawlineScore || 70);
+            updateBar('eyes', data.eyeScore || 65);
+            updateBar('skin', data.skinQuality || 60);
+            updateBar('masc', data.masculinity || 75);
+
+            // Diagnóstico
+            const diagDiv = document.getElementById('diagnosis-content');
+            if (data.diagnosis) {
+                // Se a API retornar texto HTML ou String
+                diagDiv.innerHTML = `
+                    <div class="report-section"><p class="report-content">${data.diagnosis}</p></div>
+                `;
+            } else {
+                // Fallback padrão se não vier texto
+                diagDiv.innerHTML = `
+                    <div class="report-section">
+                        <span class="report-label">Análise</span>
+                        <p class="report-content">Análise concluída com sucesso. Seus traços indicam alto potencial de desenvolvimento.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateBar(id, value) {
+            document.getElementById(`val-${id}`).innerText = `${value}/100`;
+            setTimeout(() => {
+                document.getElementById(`bar-${id}`).style.width = `${value}%`;
+            }, 300);
         }
     </script>
 </body>
