@@ -1,5 +1,5 @@
 export const config = {
-  api: { bodyParser: { sizeLimit: '10mb' } }, // Aumentei para 3 fotos
+  api: { bodyParser: { sizeLimit: '10mb' } },
 };
 
 export default async function handler(req, res) {
@@ -13,48 +13,32 @@ export default async function handler(req, res) {
     const { photos } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    if (!photos || photos.length < 1) throw new Error('Envie pelo menos 1 foto (Ideal: 3).');
+    if (!photos || photos.length < 1) throw new Error('Envie fotos.');
     if (!apiKey) throw new Error('Chave API não configurada.');
 
-    // PROMPT LOOKSMAXXING HARDCORE
     const promptSystem = `
       Atue como um juiz rigoroso da comunidade "Looksmaxxing".
-      Analise as 3 fotos (Frente, Perfil Esquerdo, Perfil Direito) para medir o dimorfismo sexual e harmonia.
+      Analise as fotos para medir o dimorfismo sexual e harmonia.
 
       SEUS OBJETIVOS:
-      1. Calcular notas numéricas precisas (0-100) para os atributos chave.
-      2. Classificar o usuário nos Tiers oficiais do Looksmaxxing.
-      3. Gerar um relatório detalhado.
+      1. Calcular notas numéricas precisas (0-100).
+      2. Classificar o usuário nos Tiers (HTN, Chadlite, Chad, etc).
+      3. Gerar relatório detalhado.
 
-      TIERS MASCULINOS (Do pior para o melhor):
-      - It's Over (Sub-5)
-      - Normie (Média)
-      - HTN (High Tier Normal)
-      - Chadlite
-      - Chad
-      - GigaChad
-
-      TIERS FEMININOS:
-      - Femcel
-      - Normie
-      - Becky
-      - Stacy
-      - GigaStacy
-
-      RETORNE APENAS ESTE JSON (Sem markdown):
+      RETORNE APENAS ESTE JSON (Sem markdown, sem quebras de linha dentro dos valores):
       {
-        "overall": 45,
-        "potential": 88,
-        "tier": "HTN (High Tier Normal)",
-        "type": "Hunter / Pretty Boy / Masc",
+        "overall": 68,
+        "potential": 89,
+        "tier": "HTN",
+        "type": "Hunter",
         "attributes": {
-          "jawline": 65,
-          "eyes": 50,
-          "hair": 70,
-          "skin": 40,
-          "masculinity": 55
+          "jawline": 70,
+          "eyes": 65,
+          "hair": 80,
+          "skin": 60,
+          "masculinity": 75
         },
-        "comment": "TEXTO DA ANÁLISE: Use termos como 'Canthal Tilt', 'Hunter Eyes', 'Ramus', 'Gonials'. Seja direto. \n\n🔎 ANÁLISE:\n[Análise técnica]\n\n⚠️ FALHAS (FAILOS):\n[O que atrapalha]\n\n🧪 PROTOCOLO:\n[Como resolver (Mewing, Skincare, Academia, etc)]"
+        "comment": "ANÁLISE: Seu rosto tem boa estrutura... | FALHAS: A pele precisa de... | PROTOCOLO: Use retinol..."
       }
     `;
 
@@ -82,10 +66,26 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error(`Erro Google: ${response.status}`);
     const data = await response.json();
     
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    let rawText = data.candidates[0].content.parts[0].text;
 
-    res.status(200).json(JSON.parse(text));
+    // --- LIMPEZA DE SEGURANÇA (FIX BAD CONTROL CHARACTER) ---
+    // Remove code blocks
+    let cleanText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+    // Remove caracteres de controle invisíveis que quebram o JSON (exceto os permitidos)
+    cleanText = cleanText.replace(/[\x00-\x1F\x7F]/g, (char) => {
+        // Mantém apenas os caracteres de controle seguros se estiverem escapados corretamente
+        return ""; 
+    });
+
+    try {
+        const jsonResult = JSON.parse(cleanText);
+        res.status(200).json(jsonResult);
+    } catch (e) {
+        console.error("Falha ao limpar JSON. Texto original:", rawText);
+        // Tenta uma recuperação de emergência ou lança erro mais claro
+        throw new Error("A IA retornou um formato inválido. Tente novamente.");
+    }
 
   } catch (error) {
     console.error(error);
