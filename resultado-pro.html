@@ -142,7 +142,8 @@
 
         <div id="view-loading" class="loading-container hidden">
             <div class="loader-ring"></div>
-            <div class="loading-status" id="loading-text">ENVIANDO PARA A IA...</div>
+            <div class="loading-status" id="loading-text">CONECTANDO A IA...</div>
+            <p style="color: #666; font-size: 0.8rem; margin-top: 10px; text-align:center">Isso pode levar até 30 segundos.</p>
         </div>
 
         <div id="view-result" class="hidden">
@@ -160,8 +161,7 @@
                 </div>
             </div>
 
-            <div class="tags-row" id="badges-container">
-                </div>
+            <div class="tags-row" id="badges-container"></div>
 
             <div class="metrics-card">
                 <div class="metric-item">
@@ -184,8 +184,7 @@
 
             <div class="report-card">
                 <div class="report-title">📋 Relatório Técnico</div>
-                <div id="diagnosis-content">
-                    </div>
+                <div id="diagnosis-content"></div>
             </div>
 
             <div class="upsell-area">
@@ -197,9 +196,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO: Coloca aqui o URL exato da tua API na Vercel
         const API_ENDPOINT = '/api/analyze'; 
-
         const fileInput = document.getElementById('file-input-real');
         const btnStart = document.getElementById('btn-start');
         
@@ -212,95 +209,107 @@
                 document.getElementById('upload-title').style.color = '#00C851';
                 btnStart.disabled = false;
 
-                // Preview
                 const reader = new FileReader();
                 reader.onload = (e) => document.getElementById('user-avatar-display').src = e.target.result;
                 reader.readAsDataURL(fileInput.files[0]);
             }
         }
 
-        // 2. Envio para API (Processamento REAL)
+        // Função auxiliar para converter arquivo em Base64
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        // 2. Processamento (Agora convertendo para JSON/Base64)
         async function processImages() {
-            // UI Update
             document.getElementById('view-upload').classList.add('hidden');
             document.getElementById('view-loading').classList.remove('hidden');
 
-            // Preparar FormData
-            const formData = new FormData();
-            for (let i = 0; i < fileInput.files.length; i++) {
-                formData.append('images', fileInput.files[i]); // 'images' deve ser a chave que o teu backend espera
-            }
-
             try {
-                // CHAMADA REAL À API
+                // Converte todas as fotos selecionadas para Base64
+                const filePromises = Array.from(fileInput.files).map(toBase64);
+                const base64Files = await Promise.all(filePromises);
+
+                // Envia como JSON (formato que o teu backend aceita)
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ photos: base64Files })
                 });
 
-                if (!response.ok) throw new Error('Erro na análise da IA');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Erro do Servidor: ${response.status}`);
+                }
 
                 const data = await response.json();
-                
-                // Sucesso: Atualiza Dashboard
                 updateDashboard(data);
 
             } catch (error) {
                 console.error(error);
-                alert("Ocorreu um erro ao conectar com o servidor. Tente novamente.");
+                alert("ERRO NA ANÁLISE:\n" + error.message + "\n\nTente novamente ou use fotos menores.");
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-upload').classList.remove('hidden');
             }
         }
 
-        // 3. Atualizar a UI com os dados do JSON recebido
+        // 3. Atualiza a tela com os dados do teu Backend
         function updateDashboard(data) {
             document.getElementById('view-loading').classList.add('hidden');
             document.getElementById('view-result').classList.remove('hidden');
             document.getElementById('view-result').classList.add('fade-in');
 
-            // -- Mapeie aqui os campos do seu JSON para o HTML --
-            
             // Notas
-            document.getElementById('res-score-current').innerText = data.currentScore || 68;
-            document.getElementById('res-score-potential').innerText = data.potentialScore || 89;
+            document.getElementById('res-score-current').innerText = data.overall || 0;
+            document.getElementById('res-score-potential').innerText = data.potential || 0;
 
-            // Badges (Ex: data.badges = ["HTN", "Hunter"])
+            // Badges (Tier e Type)
             const badgesDiv = document.getElementById('badges-container');
-            badgesDiv.innerHTML = ''; // Limpa anteriores
-            // Exemplo de tradução simples se a API mandar em inglês
-            const badgeMap = { 'HTN': 'Acima da Média', 'Hunter': 'Olhar Predador', 'Chad': 'Topo da Pirâmide' };
+            badgesDiv.innerHTML = '';
             
-            if(data.badges && data.badges.length > 0) {
-                data.badges.forEach(badge => {
-                    const label = badgeMap[badge] || badge; 
-                    badgesDiv.innerHTML += `<div class="tag active">${label}</div>`;
-                });
-            } else {
-                 badgesDiv.innerHTML = `<div class="tag active">Análise Concluída</div>`;
+            if(data.tier) badgesDiv.innerHTML += `<div class="tag active">${data.tier}</div>`;
+            if(data.type) badgesDiv.innerHTML += `<div class="tag active">${data.type}</div>`;
+
+            // Atributos (Mapeando o objeto 'attributes' do JSON)
+            if(data.attributes) {
+                updateBar('jaw', data.attributes.jawline || 0);
+                updateBar('eyes', data.attributes.eyes || 0);
+                updateBar('skin', data.attributes.skin || 0);
+                updateBar('masc', data.attributes.masculinity || 0);
             }
 
-            // Barras de Progresso
-            updateBar('jaw', data.jawlineScore || 70);
-            updateBar('eyes', data.eyeScore || 65);
-            updateBar('skin', data.skinQuality || 60);
-            updateBar('masc', data.masculinity || 75);
-
-            // Diagnóstico
+            // Diagnóstico (Separando o texto que vem com separators "|")
             const diagDiv = document.getElementById('diagnosis-content');
-            if (data.diagnosis) {
-                // Se a API retornar texto HTML ou String
-                diagDiv.innerHTML = `
-                    <div class="report-section"><p class="report-content">${data.diagnosis}</p></div>
-                `;
-            } else {
-                // Fallback padrão se não vier texto
-                diagDiv.innerHTML = `
-                    <div class="report-section">
-                        <span class="report-label">Análise</span>
-                        <p class="report-content">Análise concluída com sucesso. Seus traços indicam alto potencial de desenvolvimento.</p>
-                    </div>
-                `;
+            diagDiv.innerHTML = '';
+
+            if (data.comment) {
+                // O teu backend retorna: "ANÁLISE: ... | FALHAS: ... | PROTOCOLO: ..."
+                // Vamos separar isso para ficar bonito no HTML
+                const parts = data.comment.split('|');
+                
+                parts.forEach(part => {
+                    // Tenta identificar o titulo (ex: "ANÁLISE:")
+                    const splitPart = part.split(':');
+                    if(splitPart.length > 1) {
+                        const title = splitPart[0].trim();
+                        const content = splitPart.slice(1).join(':').trim();
+                        
+                        diagDiv.innerHTML += `
+                            <div class="report-section">
+                                <span class="report-label">${title}</span>
+                                <p class="report-content">${content}</p>
+                            </div>
+                        `;
+                    } else {
+                        // Caso não tenha separador, mostra tudo
+                        diagDiv.innerHTML += `<div class="report-section"><p class="report-content">${part}</p></div>`;
+                    }
+                });
             }
         }
 
