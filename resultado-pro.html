@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LooksLevel PRO | Análise Completa</title>
+    <title>Relatório Oficial | LooksLevel</title>
     <style>
-        /* --- DESIGN SYSTEM UCHAD / PREMIUM --- */
+        /* --- DESIGN SYSTEM ORIGINAL (RED & DARK) --- */
         :root {
-            --bg-color: #050505;
-            --card-bg: #121212;
+            --bg-color: #000000;
+            --card-bg: #111111;
             --text-main: #ffffff;
             --text-dim: #888888;
-            --neon-purple: #b026ff;
-            --neon-red: #ff2a6d;
-            --neon-gold: #ffc800;
-            --neon-blue: #00f0ff;
-            --bar-bg: #2a2a2a;
+            --brand-red: #ff2a6d; /* O Vermelho/Rosa Original */
+            --brand-gradient: linear-gradient(135deg, #ff2a6d 0%, #ff6e99 100%);
+            --bar-bg: #333333;
+            --score-gold: #fbbf24;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -31,238 +30,261 @@
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px; /* Largura mobile perfeita */
         }
 
-        /* CABEÇALHO VIP */
-        .vip-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 20px;
-        }
-        .vip-badge {
-            background: var(--neon-gold);
-            color: #000;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: 900;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 10px;
-            box-shadow: 0 0 15px rgba(255, 200, 0, 0.4);
-        }
-
-        /* UPLOAD AREA */
-        .upload-box {
-            border: 2px dashed var(--neon-purple);
-            background: rgba(176, 38, 255, 0.05);
-            border-radius: 16px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.3s;
-        }
-        .upload-box:hover { background: rgba(176, 38, 255, 0.1); }
-
-        /* RESULT AREA (ESCONDIDO NO INÍCIO) */
-        #result-area { display: none; animation: fadeIn 1s; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* HERO SECTION (FOTO + NOTAS) */
-        .hero-section {
+        /* CABEÇALHO */
+        .header-status {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
-
-        .profile-img-container {
-            width: 120px;
-            height: 120px;
-            position: relative;
+            justify-content: center;
+            margin-bottom: 25px;
         }
         
+        .status-badge {
+            background: #222;
+            color: var(--brand-red);
+            border: 1px solid var(--brand-red);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* UPLOAD SCREEN */
+        .upload-card {
+            background: var(--card-bg);
+            border: 2px dashed #333;
+            border-radius: 20px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .upload-card:hover { border-color: var(--brand-red); }
+
+        /* RESULT AREA */
+        #result-area { display: none; animation: slideUp 0.8s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HERO SECTION (FOTO + NOTAS GIGANTES) */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr; /* Nota - Foto - Nota */
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .hero-score { text-align: center; }
+        .hero-score .label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .hero-score .value { font-size: 3.5rem; font-weight: 900; line-height: 1; letter-spacing: -2px; }
+
+        .profile-wrapper {
+            position: relative;
+            width: 130px;
+            height: 130px;
+        }
         .profile-img {
             width: 100%; height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--neon-purple);
-            box-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
+            border: 4px solid var(--card-bg);
+            box-shadow: 0 0 0 4px var(--brand-red); /* Borda dupla estilosa */
         }
-
-        .big-scores {
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-around;
+        
+        /* TIERS */
+        .tier-display {
             text-align: center;
-        }
-
-        .score-box h3 { font-size: 0.8rem; color: var(--text-dim); margin: 0; text-transform: uppercase; }
-        .score-box .val { font-size: 3rem; font-weight: 800; line-height: 1; }
-        
-        /* TIERS & TYPE */
-        .meta-tags {
+            margin-bottom: 30px;
             display: flex;
-            gap: 10px;
             justify-content: center;
-            margin-bottom: 30px;
+            gap: 10px;
         }
-        .tag {
+        .tier-tag {
             background: #222;
-            padding: 8px 15px;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 0.85rem;
             font-weight: bold;
-            border: 1px solid #444;
+            font-size: 0.85rem;
             color: #fff;
+            border: 1px solid #444;
+            text-transform: uppercase;
         }
-        .tag.tier { border-color: var(--neon-blue); color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+        .tier-tag.main {
+            background: rgba(255, 42, 109, 0.1);
+            border-color: var(--brand-red);
+            color: var(--brand-red);
+        }
 
-        /* ATTRIBUTES BARS */
-        .attributes-card {
+        /* BARRAS DE ATRIBUTOS (REDESIGN) */
+        .attributes-box {
             background: var(--card-bg);
+            border-radius: 24px;
             padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
-        .attr-row {
+        .attr-row { margin-bottom: 20px; }
+        .attr-row:last-child { margin-bottom: 0; }
+
+        .attr-header {
             display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 15px;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
         }
 
-        .attr-icon { width: 30px; font-size: 1.2rem; text-align: center; }
-        .attr-label { width: 80px; font-weight: bold; font-size: 0.9rem; }
-        
         .progress-track {
-            flex-grow: 1;
-            height: 8px;
+            height: 12px;
             background: var(--bar-bg);
-            border-radius: 10px;
+            border-radius: 6px;
             overflow: hidden;
         }
         
         .progress-fill {
             height: 100%;
-            border-radius: 10px;
-            transition: width 1.5s ease-out;
+            background: var(--brand-gradient);
+            border-radius: 6px;
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 0 10px rgba(255, 42, 109, 0.4);
         }
 
-        .attr-val { width: 30px; text-align: right; font-weight: bold; font-size: 0.9rem; }
-
-        /* REPORT TEXT */
-        .report-card {
-            background: #1a1a1a;
+        /* RELATÓRIO DE TEXTO */
+        .report-box {
+            background: #151515;
             padding: 25px;
             border-radius: 20px;
-            border-left: 4px solid var(--neon-purple);
+            border-left: 4px solid var(--brand-red);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            color: #ccc;
         }
-        .report-card h3 { margin-top: 0; color: var(--neon-purple); }
-        .report-content { white-space: pre-wrap; line-height: 1.6; color: #ddd; font-size: 0.95rem; }
+        .report-box h3 { margin-top: 0; color: #fff; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
 
-        /* BUTTONS */
+        /* BOTÃO PRINCIPAL */
         .btn-action {
             width: 100%;
-            padding: 18px;
+            background: var(--brand-gradient);
             border: none;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 16px;
+            color: #fff;
+            font-weight: 900;
             font-size: 1.1rem;
-            font-weight: bold;
+            text-transform: uppercase;
             cursor: pointer;
-            margin-top: 10px;
-            background: linear-gradient(90deg, var(--neon-purple), var(--neon-red));
-            color: white;
-            box-shadow: 0 5px 20px rgba(176, 38, 255, 0.3);
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(255, 42, 109, 0.3);
+            transition: transform 0.2s;
         }
-        .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-action:active { transform: scale(0.98); }
+        .btn-action:disabled { opacity: 0.5; filter: grayscale(1); }
 
     </style>
 </head>
 <body>
 
 <div class="container">
-    
-    <div class="vip-header">
-        <div class="vip-badge">👑 PRO VERIFIED</div>
-        <h1 style="margin: 0; font-size: 1.5rem;">Painel Looksmaxxing</h1>
-        <p style="color: #666; font-size: 0.9rem;">Licença Ativa • Análise Ilimitada</p>
+
+    <div class="header-status">
+        <div class="status-badge">
+            <span>●</span> ANÁLISE PROFISSIONAL
+        </div>
     </div>
 
     <div id="upload-screen">
-        <label class="upload-box">
+        <h1 style="text-align: center; font-size: 1.8rem; margin-bottom: 10px;">Carregar Fotos</h1>
+        <p style="text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 30px;">
+            Envie 3 fotos (Frente, Perfil Direito, Perfil Esquerdo)<br>para precisão máxima.
+        </p>
+
+        <label class="upload-card">
             <input type="file" id="photoInput" multiple accept="image/*" style="display: none;">
-            <div style="font-size: 3rem; margin-bottom: 10px;">📸</div>
-            <div style="font-weight: bold; color: #fff;">Carregar Fotos para Análise</div>
-            <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">Selecione 3 fotos (Frente + Perfis)</div>
+            <div style="font-size: 3rem; margin-bottom: 15px;">📸</div>
+            <div style="font-weight: bold;">Toque para selecionar</div>
         </label>
-        <button class="btn-action" id="btnAnalyze" onclick="startAnalysis()">INICIAR ANÁLISE PRO</button>
-        <p id="status-msg" style="text-align: center; color: #666; margin-top: 15px;"></p>
+
+        <button class="btn-action" id="btnAnalyze" onclick="startAnalysis()">
+            INICIAR ANÁLISE
+        </button>
+        <p id="status-msg" style="text-align: center; color: #666; margin-top: 20px; font-size: 0.9rem;"></p>
     </div>
 
     <div id="result-area">
         
-        <div class="hero-section">
-            <div class="profile-img-container">
+        <div class="hero-grid">
+            <div class="hero-score">
+                <div class="label">NOTA ATUAL</div>
+                <div class="value" id="val-overall" style="color: #fff;">--</div>
+            </div>
+            
+            <div class="profile-wrapper">
                 <img id="user-avatar" class="profile-img" src="" alt="User">
             </div>
-            <div class="big-scores">
-                <div class="score-box">
-                    <h3>Overall</h3>
-                    <div class="val" id="val-overall" style="color: #fff;">--</div>
+
+            <div class="hero-score">
+                <div class="label">POTENCIAL</div>
+                <div class="value" id="val-potential" style="color: var(--brand-red);">--</div>
+            </div>
+        </div>
+
+        <div class="tier-display">
+            <div class="tier-tag main" id="tag-tier">NÍVEL: --</div>
+            <div class="tier-tag" id="tag-type">ARQUÉTIPO: --</div>
+        </div>
+
+        <div class="attributes-box">
+            <div class="attr-row">
+                <div class="attr-header">
+                    <span>MANDÍBULA & QUEIXO</span>
+                    <span id="num-jaw">0/100</span>
                 </div>
-                <div class="score-box">
-                    <h3>Potential</h3>
-                    <div class="val" id="val-potential" style="color: var(--neon-gold);">--</div>
+                <div class="progress-track"><div class="progress-fill" id="bar-jaw"></div></div>
+            </div>
+
+            <div class="attr-row">
+                <div class="attr-header">
+                    <span>REGIÃO DOS OLHOS</span>
+                    <span id="num-eyes">0/100</span>
                 </div>
+                <div class="progress-track"><div class="progress-fill" id="bar-eyes"></div></div>
+            </div>
+
+            <div class="attr-row">
+                <div class="attr-header">
+                    <span>QUALIDADE DA PELE</span>
+                    <span id="num-skin">0/100</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="bar-skin"></div></div>
+            </div>
+
+            <div class="attr-row">
+                <div class="attr-header">
+                    <span>DIMORFISMO (MASCULINIDADE)</span>
+                    <span id="num-masc">0/100</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="bar-masc"></div></div>
             </div>
         </div>
 
-        <div class="meta-tags">
-            <div class="tag tier" id="tag-tier">TIER: --</div>
-            <div class="tag" id="tag-type">TYPE: --</div>
-        </div>
-
-        <div class="attributes-card">
-            <div class="attr-row">
-                <div class="attr-icon">🗿</div>
-                <div class="attr-label">Jawline</div>
-                <div class="progress-track"><div class="progress-fill" id="bar-jaw" style="width: 0%; background: #ff2a6d;"></div></div>
-                <div class="attr-val" id="num-jaw">0</div>
-            </div>
-            <div class="attr-row">
-                <div class="attr-icon">👁️</div>
-                <div class="attr-label">Eyes</div>
-                <div class="progress-track"><div class="progress-fill" id="bar-eyes" style="width: 0%; background: #b026ff;"></div></div>
-                <div class="attr-val" id="num-eyes">0</div>
-            </div>
-            <div class="attr-row">
-                <div class="attr-icon">✨</div>
-                <div class="attr-label">Skin</div>
-                <div class="progress-track"><div class="progress-fill" id="bar-skin" style="width: 0%; background: #ffc800;"></div></div>
-                <div class="attr-val" id="num-skin">0</div>
-            </div>
-            <div class="attr-row">
-                <div class="attr-icon">🦁</div>
-                <div class="attr-label">Masc</div>
-                <div class="progress-track"><div class="progress-fill" id="bar-masc" style="width: 0%; background: #00f0ff;"></div></div>
-                <div class="attr-val" id="num-masc">0</div>
+        <div class="report-box">
+            <h3>📝 Diagnóstico Técnico</h3>
+            <div id="report-text">
+                Processando geometria facial...
             </div>
         </div>
 
-        <div class="report-card">
-            <h3>🔬 Relatório Técnico</h3>
-            <div class="report-content" id="report-text">
-                Carregando análise detalhada...
-            </div>
-        </div>
-
-        <button class="btn-action" style="background: #333; margin-top: 30px;" onclick="location.reload()">Nova Análise</button>
+        <button class="btn-action" style="background: #222; margin-bottom: 50px;" onclick="location.reload()">
+            NOVA AVALIAÇÃO
+        </button>
 
     </div>
 
@@ -275,16 +297,16 @@
         const status = document.getElementById('status-msg');
 
         if (input.files.length === 0) {
-            alert("Por favor, selecione suas fotos!");
+            alert("Selecione suas fotos primeiro!");
             return;
         }
 
-        // UX: Bloqueia botão e mostra loading
+        // Feedback Visual
         btn.disabled = true;
-        btn.innerText = "CALCULANDO...";
-        status.innerText = "A IA está medindo seus traços faciais...";
+        btn.innerHTML = "⚠️ PROCESSANDO <br><span style='font-size:0.8rem'>NÃO FECHE A PÁGINA</span>";
+        status.innerText = "A IA está mapeando 84 pontos do seu rosto...";
 
-        // 1. Converter imagens para Base64
+        // Converter para Base64
         const promises = Array.from(input.files).map(file => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -298,32 +320,32 @@
             const base64Photos = await Promise.all(promises);
             document.getElementById('user-avatar').src = base64Photos[0];
 
-            // 2. Enviar para a API
+            // CHAMADA API
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ photos: base64Photos })
             });
 
-            if (!response.ok) throw new Error("Erro na conexão com IA");
-
+            if (!response.ok) throw new Error("Erro de conexão com o servidor.");
             const data = await response.json();
 
-            // 3. Preencher os dados (CORREÇÃO DO BUG UNDEFINED)
-            // Aqui mapeamos exatamente o que a API retorna (data.overall, data.tier...)
-            
+            // EXIBIÇÃO DOS DADOS
             document.getElementById('upload-screen').style.display = 'none';
             document.getElementById('result-area').style.display = 'block';
 
-            // Textos principais
+            // Notas
             animateValue("val-overall", 0, data.overall || 50, 2000);
-            animateValue("val-potential", 0, data.potential || 80, 2000);
+            animateValue("val-potential", 0, data.potential || 85, 2000);
             
-            document.getElementById('tag-tier').innerText = data.tier || "ANALYZING";
-            document.getElementById('tag-type').innerText = data.type || "Unknown";
-            document.getElementById('report-text').innerText = data.comment || "Sem detalhes.";
+            // Tags (Se vier HTN, mantém, se não, coloca padrão)
+            document.getElementById('tag-tier').innerText = data.tier || "EM ANÁLISE";
+            document.getElementById('tag-type').innerText = data.type || "EM ANÁLISE";
+            
+            // Relatório
+            document.getElementById('report-text').innerText = data.comment || "Análise concluída.";
 
-            // Barras de progresso
+            // Barras (Mapeamento dos dados em Inglês da API para o HTML em PT)
             const attrs = data.attributes || {};
             setBar("bar-jaw", "num-jaw", attrs.jawline || 50);
             setBar("bar-eyes", "num-eyes", attrs.eyes || 50);
@@ -332,18 +354,18 @@
 
         } catch (error) {
             console.error(error);
-            alert("Erro: " + error.message);
+            alert("Ocorreu um erro: " + error.message);
             btn.disabled = false;
             btn.innerText = "TENTAR NOVAMENTE";
-            status.innerText = "Ocorreu um erro. Tente fotos diferentes.";
+            status.innerText = "";
         }
     }
 
     function setBar(barId, numId, value) {
-        document.getElementById(numId).innerText = value;
+        document.getElementById(numId).innerText = value + "/100";
         setTimeout(() => {
             document.getElementById(barId).style.width = value + "%";
-        }, 300);
+        }, 500);
     }
 
     function animateValue(id, start, end, duration) {
