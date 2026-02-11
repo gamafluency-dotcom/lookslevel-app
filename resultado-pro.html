@@ -3,131 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório Pro | LooksLevel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: { extend: { colors: { dark: { bg: '#0F0F0F', card: '#1F1F1F' }, brand: { red: '#FF0033', deep: '#8A0303' } } } }
+    <title>LooksLevel PRO | Análise Completa</title>
+    <style>
+        /* --- DESIGN SYSTEM UCHAD / PREMIUM --- */
+        :root {
+            --bg-color: #050505;
+            --card-bg: #121212;
+            --text-main: #ffffff;
+            --text-dim: #888888;
+            --neon-purple: #b026ff;
+            --neon-red: #ff2a6d;
+            --neon-gold: #ffc800;
+            --neon-blue: #00f0ff;
+            --bar-bg: #2a2a2a;
         }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* CABEÇALHO VIP */
+        .vip-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+        }
+        .vip-badge {
+            background: var(--neon-gold);
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+            box-shadow: 0 0 15px rgba(255, 200, 0, 0.4);
+        }
+
+        /* UPLOAD AREA */
+        .upload-box {
+            border: 2px dashed var(--neon-purple);
+            background: rgba(176, 38, 255, 0.05);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .upload-box:hover { background: rgba(176, 38, 255, 0.1); }
+
+        /* RESULT AREA (ESCONDIDO NO INÍCIO) */
+        #result-area { display: none; animation: fadeIn 1s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* HERO SECTION (FOTO + NOTAS) */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .profile-img-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+        
+        .profile-img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
+        }
+
+        .big-scores {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .score-box h3 { font-size: 0.8rem; color: var(--text-dim); margin: 0; text-transform: uppercase; }
+        .score-box .val { font-size: 3rem; font-weight: 800; line-height: 1; }
+        
+        /* TIERS & TYPE */
+        .meta-tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .tag {
+            background: #222;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid #444;
+            color: #fff;
+        }
+        .tag.tier { border-color: var(--neon-blue); color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+
+        /* ATTRIBUTES BARS */
+        .attributes-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .attr-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .attr-icon { width: 30px; font-size: 1.2rem; text-align: center; }
+        .attr-label { width: 80px; font-weight: bold; font-size: 0.9rem; }
+        
+        .progress-track {
+            flex-grow: 1;
+            height: 8px;
+            background: var(--bar-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.5s ease-out;
+        }
+
+        .attr-val { width: 30px; text-align: right; font-weight: bold; font-size: 0.9rem; }
+
+        /* REPORT TEXT */
+        .report-card {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 20px;
+            border-left: 4px solid var(--neon-purple);
+        }
+        .report-card h3 { margin-top: 0; color: var(--neon-purple); }
+        .report-content { white-space: pre-wrap; line-height: 1.6; color: #ddd; font-size: 0.95rem; }
+
+        /* BUTTONS */
+        .btn-action {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-red));
+            color: white;
+            box-shadow: 0 5px 20px rgba(176, 38, 255, 0.3);
+        }
+        .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    </style>
 </head>
-<body class="bg-dark-bg text-gray-200 min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-    <div id="uploadSection" class="max-w-md w-full bg-dark-card p-8 rounded-3xl border border-brand-red/30 shadow-[0_0_30px_rgba(255,0,51,0.1)] text-center animate-fade-in">
-        <div class="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl border border-green-500/50">
-            <i class="fas fa-check"></i>
-        </div>
-        <h1 class="text-2xl font-bold text-white mb-2">Pagamento Confirmado!</h1>
-        <p class="text-sm text-gray-400 mb-6">Sua licença PRO foi ativada. Carregue suas fotos para gerar o relatório.</p>
-
-        <input type="file" id="finalPhotos" multiple accept="image/*" class="hidden" onchange="handleFinalUpload(this.files)">
-        
-        <button id="uploadBtn" onclick="document.getElementById('finalPhotos').click()" class="w-full bg-gradient-to-r from-brand-red to-brand-deep text-white font-bold py-4 rounded-xl shadow-lg hover:brightness-110 transition transform active:scale-95">
-            <i class="fas fa-magic mr-2"></i> Gerar Análise Agora
-        </button>
-        
-        <div id="loadingStatus" class="hidden mt-6">
-            <div class="w-full bg-black rounded-full h-2 mb-2 overflow-hidden">
-                <div class="bg-brand-red h-full w-1/3 animate-pulse"></div>
-            </div>
-            <p id="statusText" class="text-xs text-brand-red animate-pulse">Otimizando imagens...</p>
-        </div>
+<div class="container">
+    
+    <div class="vip-header">
+        <div class="vip-badge">👑 PRO VERIFIED</div>
+        <h1 style="margin: 0; font-size: 1.5rem;">Painel Looksmaxxing</h1>
+        <p style="color: #666; font-size: 0.9rem;">Licença Ativa • Análise Ilimitada</p>
     </div>
 
-    <div id="resultSection" class="hidden max-w-md w-full bg-dark-card p-6 rounded-3xl border border-gray-800 shadow-2xl relative">
-        <div class="absolute top-0 right-0 bg-brand-red text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-3xl">PRO VERIFIED</div>
-        
-        <h2 class="text-center text-xl font-bold text-white mb-6">Relatório Oficial LooksLevel</h2>
-        
-        <div class="flex justify-between items-end mb-6 bg-black/40 p-5 rounded-2xl border border-gray-800">
-            <div class="text-center w-1/2 border-r border-gray-700">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Nota Atual</p>
-                <span id="scoreVal" class="text-5xl font-black text-white">--</span>
-            </div>
-            <div class="text-center w-1/2">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Potencial</p>
-                <span id="potentialVal" class="text-5xl font-black text-brand-red">--</span>
-            </div>
-        </div>
-
-        <div class="bg-dark-bg p-5 rounded-2xl border border-gray-800 mb-6">
-            <h3 class="text-brand-red font-bold text-sm mb-3 flex items-center gap-2">
-                <i class="fas fa-microscope"></i> Análise Técnica
-            </h3>
-            <p id="aiComment" class="text-sm text-gray-300 leading-relaxed text-justify">
-                Aguardando análise...
-            </p>
-        </div>
-
-        <button onclick="window.print()" class="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition">
-            Salvar Relatório em PDF <i class="fas fa-download ml-2"></i>
-        </button>
+    <div id="upload-screen">
+        <label class="upload-box">
+            <input type="file" id="photoInput" multiple accept="image/*" style="display: none;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📸</div>
+            <div style="font-weight: bold; color: #fff;">Carregar Fotos para Análise</div>
+            <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">Selecione 3 fotos (Frente + Perfis)</div>
+        </label>
+        <button class="btn-action" id="btnAnalyze" onclick="startAnalysis()">INICIAR ANÁLISE PRO</button>
+        <p id="status-msg" style="text-align: center; color: #666; margin-top: 15px;"></p>
     </div>
 
-    <script>
-        // Função para comprimir imagem antes de enviar (Resolve o problema de tamanho)
-        const compressImage = (file) => {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        // Redimensiona para no máximo 800px (suficiente para IA)
-                        const scaleSize = 800 / Math.max(img.width, img.height);
-                        canvas.width = img.width * Math.min(1, scaleSize);
-                        canvas.height = img.height * Math.min(1, scaleSize);
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        // Comprime para JPEG 0.7
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
-                    };
-                };
-            });
-        };
+    <div id="result-area">
+        
+        <div class="hero-section">
+            <div class="profile-img-container">
+                <img id="user-avatar" class="profile-img" src="" alt="User">
+            </div>
+            <div class="big-scores">
+                <div class="score-box">
+                    <h3>Overall</h3>
+                    <div class="val" id="val-overall" style="color: #fff;">--</div>
+                </div>
+                <div class="score-box">
+                    <h3>Potential</h3>
+                    <div class="val" id="val-potential" style="color: var(--neon-gold);">--</div>
+                </div>
+            </div>
+        </div>
 
-        async function handleFinalUpload(files) {
-            if(files.length < 1) return;
+        <div class="meta-tags">
+            <div class="tag tier" id="tag-tier">TIER: --</div>
+            <div class="tag" id="tag-type">TYPE: --</div>
+        </div>
 
-            document.getElementById('uploadBtn').classList.add('hidden');
-            document.getElementById('loadingStatus').classList.remove('hidden');
-            document.getElementById('statusText').innerText = "Otimizando imagens para IA...";
+        <div class="attributes-card">
+            <div class="attr-row">
+                <div class="attr-icon">🗿</div>
+                <div class="attr-label">Jawline</div>
+                <div class="progress-track"><div class="progress-fill" id="bar-jaw" style="width: 0%; background: #ff2a6d;"></div></div>
+                <div class="attr-val" id="num-jaw">0</div>
+            </div>
+            <div class="attr-row">
+                <div class="attr-icon">👁️</div>
+                <div class="attr-label">Eyes</div>
+                <div class="progress-track"><div class="progress-fill" id="bar-eyes" style="width: 0%; background: #b026ff;"></div></div>
+                <div class="attr-val" id="num-eyes">0</div>
+            </div>
+            <div class="attr-row">
+                <div class="attr-icon">✨</div>
+                <div class="attr-label">Skin</div>
+                <div class="progress-track"><div class="progress-fill" id="bar-skin" style="width: 0%; background: #ffc800;"></div></div>
+                <div class="attr-val" id="num-skin">0</div>
+            </div>
+            <div class="attr-row">
+                <div class="attr-icon">🦁</div>
+                <div class="attr-label">Masc</div>
+                <div class="progress-track"><div class="progress-fill" id="bar-masc" style="width: 0%; background: #00f0ff;"></div></div>
+                <div class="attr-val" id="num-masc">0</div>
+            </div>
+        </div>
 
-            try {
-                // 1. Comprimir todas as imagens
-                const compressionPromises = Array.from(files).slice(0,3).map(file => compressImage(file));
-                const base64Images = await Promise.all(compressionPromises);
+        <div class="report-card">
+            <h3>🔬 Relatório Técnico</h3>
+            <div class="report-content" id="report-text">
+                Carregando análise detalhada...
+            </div>
+        </div>
 
-                document.getElementById('statusText').innerText = "Analisando estrutura facial...";
+        <button class="btn-action" style="background: #333; margin-top: 30px;" onclick="location.reload()">Nova Análise</button>
 
-                // 2. Enviar
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ photos: base64Images })
-                });
+    </div>
 
-                const data = await response.json();
+</div>
 
-                if(data.error) throw new Error(data.error);
+<script>
+    async function startAnalysis() {
+        const input = document.getElementById('photoInput');
+        const btn = document.getElementById('btnAnalyze');
+        const status = document.getElementById('status-msg');
 
-                // 3. Mostrar Resultado
-                document.getElementById('scoreVal').innerText = data.score;
-                document.getElementById('potentialVal').innerText = data.potential;
-                document.getElementById('aiComment').innerText = data.comment;
-
-                document.getElementById('uploadSection').classList.add('hidden');
-                document.getElementById('resultSection').classList.remove('hidden');
-
-            } catch (error) {
-                alert("Ocorreu um erro: " + error.message);
-                location.reload();
-            }
+        if (input.files.length === 0) {
+            alert("Por favor, selecione suas fotos!");
+            return;
         }
-    </script>
+
+        // UX: Bloqueia botão e mostra loading
+        btn.disabled = true;
+        btn.innerText = "CALCULANDO...";
+        status.innerText = "A IA está medindo seus traços faciais...";
+
+        // 1. Converter imagens para Base64
+        const promises = Array.from(input.files).map(file => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        });
+
+        try {
+            const base64Photos = await Promise.all(promises);
+            document.getElementById('user-avatar').src = base64Photos[0];
+
+            // 2. Enviar para a API
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photos: base64Photos })
+            });
+
+            if (!response.ok) throw new Error("Erro na conexão com IA");
+
+            const data = await response.json();
+
+            // 3. Preencher os dados (CORREÇÃO DO BUG UNDEFINED)
+            // Aqui mapeamos exatamente o que a API retorna (data.overall, data.tier...)
+            
+            document.getElementById('upload-screen').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+
+            // Textos principais
+            animateValue("val-overall", 0, data.overall || 50, 2000);
+            animateValue("val-potential", 0, data.potential || 80, 2000);
+            
+            document.getElementById('tag-tier').innerText = data.tier || "ANALYZING";
+            document.getElementById('tag-type').innerText = data.type || "Unknown";
+            document.getElementById('report-text').innerText = data.comment || "Sem detalhes.";
+
+            // Barras de progresso
+            const attrs = data.attributes || {};
+            setBar("bar-jaw", "num-jaw", attrs.jawline || 50);
+            setBar("bar-eyes", "num-eyes", attrs.eyes || 50);
+            setBar("bar-skin", "num-skin", attrs.skin || 50);
+            setBar("bar-masc", "num-masc", attrs.masculinity || 50);
+
+        } catch (error) {
+            console.error(error);
+            alert("Erro: " + error.message);
+            btn.disabled = false;
+            btn.innerText = "TENTAR NOVAMENTE";
+            status.innerText = "Ocorreu um erro. Tente fotos diferentes.";
+        }
+    }
+
+    function setBar(barId, numId, value) {
+        document.getElementById(numId).innerText = value;
+        setTimeout(() => {
+            document.getElementById(barId).style.width = value + "%";
+        }, 300);
+    }
+
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        let range = end - start;
+        let current = start;
+        let increment = end > start ? 1 : -1;
+        let stepTime = Math.abs(Math.floor(duration / range));
+        let timer = setInterval(function() {
+            current += increment;
+            obj.innerHTML = current;
+            if (current == end) { clearInterval(timer); }
+        }, stepTime);
+    }
+</script>
+
 </body>
 </html>
